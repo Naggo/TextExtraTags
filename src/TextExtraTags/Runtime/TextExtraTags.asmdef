@@ -1,0 +1,23 @@
+{
+    "name": "TextExtraTags",
+    "rootNamespace": "TextExtraTags",
+    "references": [
+        "Unity.TextMeshPro",
+        "ZString"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.zstring",
+            "expression": "",
+            "define": "TEXTEXTRATAGS_ZSTRING_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}
