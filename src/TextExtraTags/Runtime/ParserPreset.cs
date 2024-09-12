@@ -30,5 +30,9 @@ namespace TextExtraTags {
             }
             return filters;
         }
+
+        public void AddFeature(ExtraTagFeature feature) {
+            features.Add(feature);
+        }
     }
 }

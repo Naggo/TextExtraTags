@@ -5,6 +5,6 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public abstract class ExtraTagFilter {
-        public abstract void ProcessTagData(ParserBuffer buffer, in ParserTagData tagData);
+        public abstract bool ProcessTagData(int index, ParserBuffer buffer, in ParserTagData tagData);
     }
 }
