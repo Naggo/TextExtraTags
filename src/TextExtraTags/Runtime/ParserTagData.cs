@@ -5,8 +5,8 @@ using UnityEngine;
 
 
 namespace TextExtraTags {
-    public struct ParserTagData {
-        string sourceText;
+    public ref struct ParserTagData {
+        ReadOnlySpan<char> source;
         int start;
         int end;
         int separator;
@@ -17,26 +17,27 @@ namespace TextExtraTags {
 
         public ReadOnlySpan<char> Name => GetSpan(start+1, (HasValue ? separator : end));
         public ReadOnlySpan<char> Value => GetSpan((HasValue ? separator+1 : end), end);
+        public ReadOnlySpan<char> FullText => GetSpan(start, end);
 
 
-        public ParserTagData(string sourceText, int start, int end, int separator) {
-            this.sourceText = sourceText;
+        public ParserTagData(ReadOnlySpan<char> source, int start, int end, int separator) {
+            this.source = source;
             this.start = start;
             this.end = end;
             this.separator = separator;
         }
 
 
-        public bool IsName(ReadOnlySpan<char> value) {
-            return Name.SequenceEqual(value);
+        public bool IsName(ReadOnlySpan<char> name) {
+            return Name.SequenceEqual(name);
         }
 
 
         ReadOnlySpan<char> GetSpan(int sliceStart, int sliceEnd) {
-            if (sourceText is null) {
-                return ReadOnlySpan<char>.Empty;
+            if (source.IsEmpty) {
+                return source;
             }
-            return sourceText.AsSpan().Slice(sliceStart, sliceEnd-sliceStart);
+            return source.Slice(sliceStart, sliceEnd-sliceStart);
         }
     }
 }

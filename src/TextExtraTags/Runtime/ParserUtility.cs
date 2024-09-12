@@ -6,19 +6,21 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public static class ParserUtility {
-        public static bool TryParseTag(string sourceText, int startIndex, out ParserTagData result) {
+        public static bool TryParseTag(
+            ReadOnlySpan<char> source, int startIndex, out ParserTagData result
+        ) {
             int lbIndex = -1;
             int sepIndex = -1;
 
-            for (int i = startIndex; i < sourceText.Length; i++) {
-                char c = sourceText[i];
+            for (int i = startIndex; i < source.Length; i++) {
+                char c = source[i];
 
                 if (c == '<') {
                     lbIndex = i;
                 } else if (c == '=' && sepIndex < lbIndex) {
                     sepIndex = i;
                 } else if (c == '>' && 0 <= lbIndex){
-                    result = new ParserTagData(sourceText, lbIndex, i, sepIndex);
+                    result = new ParserTagData(source, lbIndex, i, sepIndex);
                     return true;
                 }
             }
@@ -149,6 +151,34 @@ namespace TextExtraTags {
                 case 'w':
                     if (name.SequenceEqual("width")) {
                         return true;
+                    }
+                    break;
+                case '/':
+                    if (name.Length == 1) {
+                        return false;
+                    }
+                    switch (name[1]) {
+                        case 'a':
+                            if (name.SequenceEqual("/align")) {
+                                return true;
+                            } else if (name.SequenceEqual("/allcaps")) {
+                                return true;
+                            } else if (name.SequenceEqual("/alpha")) {
+                                return true;
+                            }
+                            break;
+                        case 'b':
+                            if (name.Length == 2) {
+                                return true;
+                            }
+                            break;
+                        case 'c':
+                            if (name.SequenceEqual("/color")) {
+                                return true;
+                            } else if (name.SequenceEqual("/cspace")) {
+                                return true;
+                            }
+                            break;
                     }
                     break;
             }
