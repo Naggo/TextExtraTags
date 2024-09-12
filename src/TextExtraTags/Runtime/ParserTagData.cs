@@ -17,7 +17,7 @@ namespace TextExtraTags {
 
         public ReadOnlySpan<char> Name => GetSpan(start+1, (HasValue ? separator : end));
         public ReadOnlySpan<char> Value => GetSpan((HasValue ? separator+1 : end), end);
-        public ReadOnlySpan<char> FullText => GetSpan(start, end);
+        public ReadOnlySpan<char> FullText => GetSpan(start, end+1);
 
 
         public ParserTagData(ReadOnlySpan<char> source, int start, int end, int separator) {

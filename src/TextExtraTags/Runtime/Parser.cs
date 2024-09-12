@@ -1,23 +1,21 @@
-#define TEXTEXTRATAGS_ZSTRING_SUPPORT
-
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
-
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-using Cysharp.Text;
-#else
-using System.Text;
-#endif
 
 
 namespace TextExtraTags {
     public class Parser {
+        const int DefaultBufferSize = 256;
+
+
         ParserPreset preset;
         ParserFilters filters;
         ParserBuffer buffer;
+
+        int textSize;
+        char[] textBuffer;
 
         public string Name => preset.Name;
 
@@ -26,129 +24,138 @@ namespace TextExtraTags {
             this.preset = preset;
             this.filters = preset.CreateFilters();
             this.buffer = new ParserBuffer();
+            this.textSize = 0;
+            this.textBuffer = ArrayPool<char>.Shared.Rent(DefaultBufferSize);
         }
 
 
-        public ReadOnlySpan<char> Parse(ReadOnlySpan<char> source, List<ExtraTagBase> resultTags) {
-            #if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                using (var builder = ZString.CreateStringBuilder())
-            #else
-                var builder = new StringBuilder();
-            #endif
-            {
-                buffer.ClearAll();
+        public ReadOnlySpan<char> Parse(ReadOnlySpan<char> source, ExtraTagCollection resultTags) {
+            buffer.ClearAll();
+            resultTags.Clear();
+            textSize = 0;
 
-                bool allowParsing = true;
-                int sourceIndex = 0;
-                int parsedIndex = 0;
-                ParserTagData tagData;
-                while (ParserUtility.TryParseTag(source, sourceIndex, out tagData)) {
-                    bool isInvalidTag = false;
-                    bool isRichTextTag = false;
-                    bool isExtraTag = false;
+            filters.Setup();
 
-                    do {
-                        // noparse の判定
-                        if (allowParsing) {
-                            if (tagData.IsName("noparse")) {
-                                allowParsing = false;
-                                isRichTextTag = true;
-                            } else if (tagData.IsName("/noparse")) {
-                                isRichTextTag = true;
-                            }
-                        } else {
-                            if (tagData.IsName("/noparse")) {
-                                allowParsing = true;
-                                isRichTextTag = true;
-                            } else {
-                                isInvalidTag = true;
-                                break;
-                            }
-                        }
+            bool allowParsing = true;
+            int sourceIndex = 0;
+            int parsedIndex = 0;
+            ParserTagData tagData;
+            while (ParserUtility.TryParseTag(source, sourceIndex, out tagData)) {
+                bool isInvalidTag = false;
+                bool isRichTextTag = false;
+                bool isExtraTag = false;
 
-                        // フィルターにタグを渡す
-                        bool isParsed = false;
-                        foreach (var filter in filters) {
-                            isParsed |= filter.ProcessTagData(parsedIndex, buffer, tagData);
-                        }
+                int textLength = tagData.Index - sourceIndex;
+                int textAndTagLength = textLength + tagData.Length;
+                parsedIndex += textLength;
 
-                        if (isRichTextTag || ParserUtility.IsRichTextTag(tagData)) {
-                            // リッチテキスト
+                do {
+                    // noparse の判定
+                    if (allowParsing) {
+                        if (tagData.IsName("noparse")) {
+                            allowParsing = false;
                             isRichTextTag = true;
-                        } else if (isParsed) {
-                            // エクストラ
-                            isExtraTag = true;
+                        }
+                    } else {
+                        if (tagData.IsName("/noparse")) {
+                            allowParsing = true;
+                            isRichTextTag = true;
                         } else {
-                            // 該当なし
                             isInvalidTag = true;
+                            break;
                         }
-                    } while (false);
-
-                    if (isInvalidTag) {
-                        // タグを含めた文章の追加
-                        int textAndTagLength = tagData.Index + tagData.Length - sourceIndex;
-                        builder.Append(source.Slice(sourceIndex, textAndTagLength));
-                        parsedIndex += textAndTagLength;
-                        sourceIndex += textAndTagLength;
-                    } else if (isRichTextTag) {
-                        // タグを追加するが、タグの分のインデックスは加算しない
-                        int textLength = tagData.Index - sourceIndex;
-                        int textAndTagLength = textLength + tagData.Length;
-                        builder.Append(source.Slice(sourceIndex, textAndTagLength));
-                        parsedIndex += textLength;
-                        sourceIndex += textAndTagLength;
-                    } else if (isExtraTag) {
-                        // タグを除去する
-                        int textLength = tagData.Index - sourceIndex;
-                        int textAndTagLength = textLength + tagData.Length;
-                        builder.Append(source.Slice(sourceIndex, textLength));
-                        parsedIndex += textLength;
-                        sourceIndex += textAndTagLength;
                     }
 
-                    // バッファデータの処理
-                    if (buffer.HasText) {
-                        ReadOnlySpan<char> bufferSpan = buffer.Text;
-                        int bufferIndex = 0;
-                        ParserTagData givenTagData;
-                        while (ParserUtility.TryParseTag(bufferSpan, bufferIndex, out givenTagData)) {
-                            // エクストラタグの処理は行わない
-                            if (ParserUtility.IsRichTextTag(givenTagData)) {
-                                // タグを追加するが、タグの分のインデックスは加算しない
-                                int textLength = givenTagData.Index - bufferIndex;
-                                int textAndTagLength = textLength + givenTagData.Length;
-                                builder.Append(bufferSpan.Slice(bufferIndex, textAndTagLength));
-                                parsedIndex += textLength;
-                                bufferIndex += textAndTagLength;
-                            } else {
-                                // タグを含めた文章の追加
-                                int textAndTagLength = givenTagData.Index + givenTagData.Length - bufferIndex;
-                                builder.Append(bufferSpan.Slice(bufferIndex, textAndTagLength));
-                                parsedIndex += textAndTagLength;
-                                bufferIndex += textAndTagLength;
-                            }
-                        }
+                    // フィルターにタグを渡す
+                    bool isParsed = filters.ProcessTagData(parsedIndex, buffer, tagData);
 
-                        // 残りのバッファテキストの加算
-                        int remainBufferLength = bufferSpan.Length - bufferIndex;
-                        builder.Append(bufferSpan.Slice(bufferIndex, remainBufferLength));
+                    if (isRichTextTag || ParserUtility.IsRichTextTag(tagData)) {
+                        // リッチテキスト
+                        isRichTextTag = true;
+                    } else if (isParsed) {
+                        // エクストラ
+                        isExtraTag = true;
+                    } else {
+                        // 該当なし
+                        isInvalidTag = true;
                     }
+                } while (false);
 
-                    if (buffer.Modified) {
-                        buffer.ClearAll();
-                    }
+                if (isInvalidTag) {
+                    // タグを含めた文章の追加
+                    AppendText(source.Slice(sourceIndex, textAndTagLength));
+                    parsedIndex += tagData.Length;
+                    sourceIndex += textAndTagLength;
+                } else if (isRichTextTag) {
+                    // タグを追加するが、タグの分のインデックスは加算しない
+                    AppendText(source.Slice(sourceIndex, textAndTagLength));
+                    sourceIndex += textAndTagLength;
+                } else if (isExtraTag) {
+                    // タグを除去する
+                    AppendText(source.Slice(sourceIndex, textLength));
+                    sourceIndex += textAndTagLength;
                 }
 
-                // 残りのソーステキストの加算
-                int remainTextLength = source.Length - sourceIndex;
-                builder.Append(source.Slice(sourceIndex, remainTextLength));
+                // バッファデータの処理
+                if (buffer.HasText) {
+                    ReadOnlySpan<char> bufferSpan = buffer.Text;
+                    int bufferIndex = 0;
+                    ParserTagData givenTagData;
+                    while (ParserUtility.TryParseTag(bufferSpan, bufferIndex, out givenTagData)) {
+                        int bufferTextLength = givenTagData.Index - bufferIndex;
+                        int bufferTextAndTagLength = bufferTextLength + givenTagData.Length;
+                        // エクストラタグの処理は行わない
+                        if (ParserUtility.IsRichTextTag(givenTagData)) {
+                            // タグを追加するが、タグの分のインデックスは加算しない
+                            AppendText(bufferSpan.Slice(bufferIndex, bufferTextAndTagLength));
+                            parsedIndex += bufferTextLength;
+                            bufferIndex += bufferTextAndTagLength;
+                        } else {
+                            // タグを含めた文章の追加
+                            AppendText(bufferSpan.Slice(bufferIndex, bufferTextAndTagLength));
+                            parsedIndex += bufferTextAndTagLength;
+                            bufferIndex += bufferTextAndTagLength;
+                        }
+                    }
 
-                #if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                    return builder.AsSpan();
-                #else
-                    return builder.ToString().AsSpan();
-                #endif
+                    // 残りのバッファテキストの加算
+                    int remainBufferTextLength = bufferSpan.Length - bufferIndex;
+                    parsedIndex += remainBufferTextLength;
+                    AppendText(bufferSpan.Slice(bufferIndex, remainBufferTextLength));
+                }
+
+                if (buffer.HasTags) {
+                    resultTags.AddExtraTags(buffer.Tags);
+                }
+
+                if (buffer.Modified) {
+                    buffer.ClearAll();
+                }
             }
+
+            // 残りのソーステキストの加算
+            int remainTextLength = source.Length - sourceIndex;
+            AppendText(source.Slice(sourceIndex, remainTextLength));
+
+            filters.Reset();
+
+            return textBuffer.AsSpan(0, textSize);
+        }
+
+
+        void AppendText(ReadOnlySpan<char> text) {
+            Span<char> span = textBuffer.AsSpan(textSize);
+            while (text.Length > span.Length) {
+                int newBufferSize = textBuffer.Length * 2;
+                var newBuffer = ArrayPool<char>.Shared.Rent(newBufferSize);
+                textBuffer.CopyTo(newBuffer, 0);
+                ArrayPool<char>.Shared.Return(textBuffer);
+
+                textBuffer = newBuffer;
+                span = textBuffer.AsSpan(textSize);
+            }
+            text.CopyTo(span);
+            textSize += text.Length;
         }
     }
 }
