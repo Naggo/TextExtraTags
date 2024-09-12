@@ -44,7 +44,7 @@ namespace TextExtraTags {
                     }
                     break;
                 case 'b':
-                    if (name.Length == 1) {
+                    if (name.SequenceEqual("b")) {
                         return true;
                     } else if (name.SequenceEqual("br")) {
                         return true;
@@ -70,7 +70,7 @@ namespace TextExtraTags {
                     }
                     break;
                 case 'i':
-                    if (name.Length == 1) {
+                    if (name.SequenceEqual("i")) {
                         return true;
                     } else if (name.SequenceEqual("indent")) {
                         return true;
@@ -116,7 +116,7 @@ namespace TextExtraTags {
                     }
                     break;
                 case 's':
-                    if (name.Length == 1) {
+                    if (name.SequenceEqual("s")) {
                         return true;
                     } else if (name.SequenceEqual("size")) {
                         return true;
@@ -137,7 +137,7 @@ namespace TextExtraTags {
                     }
                     break;
                 case 'u':
-                    if (name.Length == 1) {
+                    if (name.SequenceEqual("u")) {
                         return true;
                     } else if (name.SequenceEqual("uppercase")) {
                         return true;
@@ -168,7 +168,7 @@ namespace TextExtraTags {
                             }
                             break;
                         case 'b':
-                            if (name.Length == 2) {
+                            if (name.SequenceEqual("/b")) {
                                 return true;
                             }
                             break;
@@ -176,6 +176,91 @@ namespace TextExtraTags {
                             if (name.SequenceEqual("/color")) {
                                 return true;
                             } else if (name.SequenceEqual("/cspace")) {
+                                return true;
+                            }
+                            break;
+                        case 'f':
+                            if (name.SequenceEqual("/font")) {
+                                return true;
+                            } else if (name.SequenceEqual("/font-weight")) {
+                                return true;
+                            }
+                            break;
+                        case 'g':
+                            if (name.SequenceEqual("/gradient")) {
+                                return true;
+                            }
+                            break;
+                        case 'i':
+                            if (name.SequenceEqual("/i")) {
+                                return true;
+                            } else if (name.SequenceEqual("/indent")) {
+                                return true;
+                            }
+                            break;
+                        case 'l':
+                            if (name.SequenceEqual("/line-height")) {
+                                return true;
+                            } else if (name.SequenceEqual("/line-indent")) {
+                                return true;
+                            } else if (name.SequenceEqual("/link")) {
+                                return true;
+                            } else if (name.SequenceEqual("/lowercase")) {
+                                return true;
+                            }
+                            break;
+                        case 'm':
+                            if (name.SequenceEqual("/margin")) {
+                                return true;
+                            } else if (name.SequenceEqual("/mark")) {
+                                return true;
+                            } else if (name.SequenceEqual("/mspace")) {
+                                return true;
+                            }
+                            break;
+                        case 'n':
+                            if (name.SequenceEqual("/nobr")) {
+                                return true;
+                            } else if (name.SequenceEqual("/noparse")) {
+                                return true;
+                            }
+                            break;
+                        case 'r':
+                            if (name.SequenceEqual("/rotate")) {
+                                return true;
+                            }
+                            break;
+                        case 's':
+                            if (name.SequenceEqual("/s")) {
+                                return true;
+                            } else if (name.SequenceEqual("/size")) {
+                                return true;
+                            } else if (name.SequenceEqual("/smallcaps")) {
+                                return true;
+                            } else if (name.SequenceEqual("/strikethrough")) {
+                                return true;
+                            } else if (name.SequenceEqual("/style")) {
+                                return true;
+                            } else if (name.SequenceEqual("/sub")) {
+                                return true;
+                            } else if (name.SequenceEqual("/sup")) {
+                                return true;
+                            }
+                            break;
+                        case 'u':
+                            if (name.SequenceEqual("/u")) {
+                                return true;
+                            } else if (name.SequenceEqual("/uppercase")) {
+                                return true;
+                            }
+                            break;
+                        case 'v':
+                            if (name.SequenceEqual("/voffset")) {
+                                return true;
+                            }
+                            break;
+                        case 'w':
+                            if (name.SequenceEqual("/width")) {
                                 return true;
                             }
                             break;

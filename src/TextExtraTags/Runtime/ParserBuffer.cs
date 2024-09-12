@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,9 +7,12 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public class ParserBuffer {
+        const int DefaultBufferSize = 128;
+
+
         int textSize;
-        char[] textBuffer = new char[128];
-        List<ExtraTagBase> tags = new();
+        char[] textBuffer;
+        List<ExtraTagBase> tags;
 
         public bool HasText => textSize > 0;
         public bool HasTags => tags.Count > 0;
@@ -16,6 +20,13 @@ namespace TextExtraTags {
 
         public ReadOnlySpan<char> Text => textBuffer.AsSpan(0, textSize);
         public IEnumerable<ExtraTagBase> Tags => tags;
+
+
+        public ParserBuffer() {
+            this.textSize = 0;
+            this.textBuffer = ArrayPool<char>.Shared.Rent(DefaultBufferSize);
+            this.tags = new();
+        }
 
 
         public void ClearAll() {
@@ -26,7 +37,12 @@ namespace TextExtraTags {
         public void AddText(ReadOnlySpan<char> text) {
             Span<char> span = textBuffer.AsSpan(textSize);
             while (text.Length > span.Length) {
-                Array.Resize(ref textBuffer, textBuffer.Length * 2);
+                int newBufferSize = textBuffer.Length * 2;
+                var newBuffer = ArrayPool<char>.Shared.Rent(newBufferSize);
+                textBuffer.CopyTo(newBuffer, 0);
+                ArrayPool<char>.Shared.Return(textBuffer);
+
+                textBuffer = newBuffer;
                 span = textBuffer.AsSpan(textSize);
             }
             text.CopyTo(span);
