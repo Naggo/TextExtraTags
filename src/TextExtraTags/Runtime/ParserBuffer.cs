@@ -6,7 +6,7 @@ using UnityEngine;
 
 
 namespace TextExtraTags {
-    public class ParserBuffer : IDisposable {
+    public class ParserBuffer {
         const int DefaultBufferSize = 128;
 
 
@@ -56,11 +56,6 @@ namespace TextExtraTags {
 
         public void AddExtraTag(ExtraTagBase tag) {
             tags.Add(tag);
-        }
-
-
-        public void Dispose() {
-            textBuffer = null;
         }
     }
 }

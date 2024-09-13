@@ -6,7 +6,7 @@ using UnityEngine;
 
 
 namespace TextExtraTags {
-    public class Parser : IDisposable {
+    public class Parser {
         ParserPreset preset;
         ParserFilters filters;
         ParserBuffer buffer;
@@ -156,12 +156,6 @@ namespace TextExtraTags {
             filters.Reset();
 
             return this;
-        }
-
-
-        public void Dispose() {
-            buffer.Dispose();
-            textBuffer = null;
         }
 
 

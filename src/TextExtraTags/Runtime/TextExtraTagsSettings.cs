@@ -45,10 +45,6 @@ namespace TextExtraTags {
 
         public void ResetParsers() {
             if (parsers is null || parsers.Count == 0) return;
-
-            foreach (var parser in parsers.Values) {
-                parser.Dispose();
-            }
             parsers.Clear();
         }
 
