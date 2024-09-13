@@ -11,12 +11,12 @@ namespace TextExtraTags.Editor {
     using UnityEditor;
 
     public class TextExtraTagsSettingsProvider : SettingsProvider {
-        const string settingPath = "Project/TextExtraTags";
+        const string settingPath = "Project/Text Extra Tags";
 
         [SettingsProvider]
         public static SettingsProvider CreateProvider()
         {
-            // SettingsScopeをProjectにします
+            // SettingsScope を Projectにします
             return new TextExtraTagsSettingsProvider(settingPath, SettingsScope.Project, null);
         }
 
@@ -25,7 +25,7 @@ namespace TextExtraTags.Editor {
             var parent = "Assets/Resources";
             if (!AssetDatabase.IsValidFolder(parent))
             {
-                // Resourcesフォルダが無いことを考慮
+                // Resources フォルダが無いことを考慮
                 AssetDatabase.CreateFolder("Assets", "Resources");
             }
 
@@ -71,6 +71,7 @@ namespace TextExtraTags.Editor {
 
             using (new EditorGUI.DisabledScope(!isPersistent))
             {
+                GUILayout.Space(EditorGUIUtility.singleLineHeight);
                 _editor.OnInspectorGUI();
             }
         }
