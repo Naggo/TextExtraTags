@@ -2,8 +2,7 @@
     "name": "TextExtraTags",
     "rootNamespace": "TextExtraTags",
     "references": [
-        "Unity.TextMeshPro",
-        "ZString"
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,9 +13,14 @@
     "defineConstraints": [],
     "versionDefines": [
         {
-            "name": "com.cysharp.zstring",
+            "name": "com.unity.textmeshpro",
             "expression": "",
-            "define": "TEXTEXTRATAGS_ZSTRING_SUPPORT"
+            "define": "TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "2.0.0",
+            "define": "TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT"
         }
     ],
     "noEngineReferences": false

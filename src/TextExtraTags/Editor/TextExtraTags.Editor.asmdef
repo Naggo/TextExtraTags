@@ -13,12 +13,6 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.cysharp.zstring",
-            "expression": "",
-            "define": "TEXTEXTRATAGS_ZSTRING_SUPPORT"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }
