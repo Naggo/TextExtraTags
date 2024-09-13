@@ -10,6 +10,10 @@ namespace TextExtraTags {
             return TextExtraTagsSettings.Instance.GetParser(name);
         }
 
+        public static IEnumerable<string> GetParserNames() {
+            return TextExtraTagsSettings.Instance.GetNames();
+        }
+
         public static bool TryParseTag(
             ReadOnlySpan<char> source, int startIndex, out ParserTagData result
         ) {
