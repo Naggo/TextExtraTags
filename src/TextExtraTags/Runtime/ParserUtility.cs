@@ -6,6 +6,10 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public static class ParserUtility {
+        public static Parser GetParser(string name) {
+            return TextExtraTagsSettings.Instance.GetParser(name);
+        }
+
         public static bool TryParseTag(
             ReadOnlySpan<char> source, int startIndex, out ParserTagData result
         ) {

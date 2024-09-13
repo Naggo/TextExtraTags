@@ -11,15 +11,27 @@ namespace TextExtraTags {
         string name;
 
         [SerializeField]
+        [Range(0, 4)]
+        int capacityLevel;
+
+        [SerializeField]
         [SerializeReference]
         List<ExtraTagFeature> features;
 
         public string Name => name;
+        public bool IsDefault => name == TextExtraTagsSettings.DefaultPresetName;
 
 
-        public ParserPreset(string name) {
+        public ParserPreset(string name, int capacityLevel) {
             this.name = name;
-            features = new();
+            this.capacityLevel = capacityLevel;
+            this.features = new List<ExtraTagFeature>();
+        }
+
+        public ParserPreset(string name, int capacityLevel, IEnumerable<ExtraTagFeature> features) {
+            this.name = name;
+            this.capacityLevel = capacityLevel;
+            this.features = new List<ExtraTagFeature>(features);
         }
 
 
@@ -31,8 +43,37 @@ namespace TextExtraTags {
             return filters;
         }
 
-        public void AddFeature(ExtraTagFeature feature) {
-            features.Add(feature);
+        public int GetParserTextCapacity() {
+            return capacityLevel switch {
+                0 => 64,
+                1 => 128,
+                2 => 256,
+                3 => 512,
+                4 => 1024,
+                _ => 64,
+            };
+        }
+
+        public int GetParserBufferTextCapacity() {
+            return capacityLevel switch {
+                0 => 32,
+                1 => 64,
+                2 => 128,
+                3 => 256,
+                4 => 512,
+                _ => 32,
+            };
+        }
+
+        public int GetParserBufferTagsCapacity() {
+            return capacityLevel switch {
+                0 => 1,
+                1 => 2,
+                2 => 4,
+                3 => 8,
+                4 => 16,
+                _ => 1,
+            };
         }
     }
 }

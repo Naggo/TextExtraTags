@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public class Parser {
-        const int DefaultBufferSize = 256;
-
-
         ParserPreset preset;
         ParserFilters filters;
         ParserBuffer buffer;
@@ -18,18 +15,37 @@ namespace TextExtraTags {
         char[] textBuffer;
 
         public string Name => preset.Name;
+        public bool IsDefault => preset.IsDefault;
 
 
         public Parser(ParserPreset preset) {
             this.preset = preset;
             this.filters = preset.CreateFilters();
-            this.buffer = new ParserBuffer();
+            this.buffer = new ParserBuffer(
+                preset.GetParserBufferTextCapacity(),
+                preset.GetParserBufferTagsCapacity()
+            );
             this.textSize = 0;
-            this.textBuffer = ArrayPool<char>.Shared.Rent(DefaultBufferSize);
+            this.textBuffer = ArrayPool<char>.Shared.Rent(preset.GetParserTextCapacity());
         }
 
 
-        public ReadOnlySpan<char> Parse(ReadOnlySpan<char> source, ExtraTagCollection resultTags) {
+        public ReadOnlySpan<char> AsSpan() {
+            return textBuffer.AsSpan(0, textSize);
+        }
+
+        public ArraySegment<char> AsArraySegment() {
+            return new ArraySegment<char>(textBuffer, 0, textSize);
+        }
+
+        public override string ToString() {
+            if (textSize == 0)
+                return string.Empty;
+
+            return new string(textBuffer, 0, textSize);
+        }
+
+        public Parser Parse(ReadOnlySpan<char> source, ExtraTagCollection resultTags) {
             buffer.ClearAll();
             resultTags.Clear();
             textSize = 0;
@@ -139,7 +155,7 @@ namespace TextExtraTags {
 
             filters.Reset();
 
-            return textBuffer.AsSpan(0, textSize);
+            return this;
         }
 
 
