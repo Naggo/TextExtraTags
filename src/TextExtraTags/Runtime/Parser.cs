@@ -26,7 +26,7 @@ namespace TextExtraTags {
                 preset.GetParserBufferTagsCapacity()
             );
             this.textSize = 0;
-            this.textBuffer = ArrayPool<char>.Shared.Rent(preset.GetParserTextCapacity());
+            this.textBuffer = new char[preset.GetParserTextCapacity()];
         }
 
 
@@ -161,8 +161,6 @@ namespace TextExtraTags {
 
         public void Dispose() {
             buffer.Dispose();
-            if (textBuffer is null) return;
-            ArrayPool<char>.Shared.Return(textBuffer);
             textBuffer = null;
         }
 
@@ -171,9 +169,8 @@ namespace TextExtraTags {
             Span<char> span = textBuffer.AsSpan(textSize);
             while (text.Length > span.Length) {
                 int newBufferSize = textBuffer.Length * 2;
-                var newBuffer = ArrayPool<char>.Shared.Rent(newBufferSize);
+                var newBuffer = new char[newBufferSize];
                 textBuffer.CopyTo(newBuffer, 0);
-                ArrayPool<char>.Shared.Return(textBuffer);
 
                 textBuffer = newBuffer;
                 span = textBuffer.AsSpan(textSize);

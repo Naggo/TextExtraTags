@@ -24,13 +24,13 @@ namespace TextExtraTags {
 
         public ParserBuffer() {
             this.textSize = 0;
-            this.textBuffer = ArrayPool<char>.Shared.Rent(DefaultBufferSize);
+            this.textBuffer = new char[DefaultBufferSize];
             this.tags = new();
         }
 
         public ParserBuffer(int textCapacity, int tagsCapacity) {
             this.textSize = 0;
-            this.textBuffer = ArrayPool<char>.Shared.Rent(textCapacity);
+            this.textBuffer = new char[textCapacity];
             this.tags = new(tagsCapacity);
         }
 
@@ -44,9 +44,8 @@ namespace TextExtraTags {
             Span<char> span = textBuffer.AsSpan(textSize);
             while (text.Length > span.Length) {
                 int newBufferSize = textBuffer.Length * 2;
-                var newBuffer = ArrayPool<char>.Shared.Rent(newBufferSize);
+                var newBuffer = new char[newBufferSize];
                 textBuffer.CopyTo(newBuffer, 0);
-                ArrayPool<char>.Shared.Return(textBuffer);
 
                 textBuffer = newBuffer;
                 span = textBuffer.AsSpan(textSize);
@@ -61,8 +60,6 @@ namespace TextExtraTags {
 
 
         public void Dispose() {
-            if (textBuffer is null) return;
-            ArrayPool<char>.Shared.Return(textBuffer);
             textBuffer = null;
         }
     }
