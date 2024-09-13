@@ -32,13 +32,14 @@ namespace TextExtraTags.Standards {
         public override bool ProcessTagData(
                 int index, ParserBuffer buffer, in ParserTagData tagData)
         {
-            if ((tagData.IsName("ruby") || tagData.IsName("r") && tagData.HasValue)) {
-                startIndex = index;
-                AppendText(tagData.Value);
-                return true;
-            }
-
-            if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
+            if (tagData.IsName("ruby") || tagData.IsName("r")) {
+                var ruby = tagData.Value;
+                if (ruby.Length > 0) {
+                    startIndex = index;
+                    AppendText(tagData.Value);
+                    return true;
+                }
+            } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubySize > 0) {
                     ProcessRuby(index, buffer, tagData);
                     rubySize = 0;
