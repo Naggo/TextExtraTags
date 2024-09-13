@@ -34,7 +34,7 @@ namespace TextExtraTags.Editor {
             DrawCreateButton();
 
             if (serializedObject.ApplyModifiedProperties()) {
-                settings.Parsers.Clear();
+                settings.ResetParsers();
             }
         }
 

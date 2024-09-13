@@ -35,20 +35,29 @@ namespace TextExtraTags {
         [SerializeField]
         List<ParserPreset> parserPresets;
 
-        Dictionary<string, Parser> _parsers;
-        public IDictionary<string, Parser> Parsers {
-            get {
-                if (_parsers is null) {
-                    _parsers = new();
-                }
-                return _parsers;
-            }
+        Dictionary<string, Parser> parsers;
+
+
+        void OnDestroy() {
+            ResetParsers();
         }
 
 
+        public void ResetParsers() {
+            if (parsers is null || parsers.Count == 0) return;
+
+            foreach (var parser in parsers.Values) {
+                parser.Dispose();
+            }
+            parsers.Clear();
+        }
+
         public Parser GetParser(string name, bool returnDefault = true) {
             Parser parser;
-            if (Parsers.TryGetValue(name, out parser)) {
+            if (parsers is null) {
+                parsers = new();
+            }
+            if (parsers.TryGetValue(name, out parser)) {
                 return parser;
             }
             var preset = GetPreset(name);
@@ -60,7 +69,7 @@ namespace TextExtraTags {
                 }
             }
             parser = new Parser(preset);
-            Parsers[preset.Name] = parser;
+            parsers[preset.Name] = parser;
             return parser;
         }
 
