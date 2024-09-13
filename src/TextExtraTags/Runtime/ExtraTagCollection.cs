@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 namespace TextExtraTags {
-    public class ExtraTagCollection : IEnumerable<ExtraTagBase>, IDisposable {
+    public class ExtraTagCollection : IReadOnlyExtraTagCollection, IDisposable {
         List<ExtraTagBase> m_tags;
 
 
