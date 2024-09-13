@@ -1,10 +1,18 @@
+using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if TEXTEXTRATAGS_ZSTRING_SUPPORT
+    using Cysharp.Text;
+#else
+    using System.Text;
+#endif
+
 
 namespace TextExtraTags.Standards {
-    public class RubyTagFilter : RubyTagFilter {
+    public class RubyTagFilter : ExtraTagFilter {
         int startIndex;
         int rubySize;
         char[] rubyBuffer;
@@ -32,7 +40,8 @@ namespace TextExtraTags.Standards {
 
             if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubySize > 0) {
-                    
+                    ProcessRuby(index, buffer, tagData);
+                    rubySize = 0;
                 }
                 return true;
             }
@@ -41,12 +50,43 @@ namespace TextExtraTags.Standards {
         }
 
 
+        void ProcessRuby(int index, ParserBuffer buffer, in ParserTagData tagData) {
+            #if TEXTEXTRATAGS_ZSTRING_SUPPORT
+                using (var builder = ZString.CreateStringBuilder(true))
+            #else
+                var builder = new StringBuilder();
+            #endif
+            {
+                ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubySize);
+                int rL = ruby.Length;
+                int kL2 = (index - startIndex) * 2;
+
+                // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
+                float space = -(kL2 * 0.25f + rL * 0.25f);
+                builder.AppendFormat("<space={0:F2}em><voffset=1em><size=50%>", space);
+                builder.Append(ruby);
+                builder.Append("</size></voffset>");
+
+                // 後ろに付ける空白
+                space = (kL2 - rL) * 0.25f;
+                if (space != 0) {
+                    builder.AppendFormat("<space={0:F2}em>", space);
+                }
+
+                #if TEXTEXTRATAGS_ZSTRING_SUPPORT
+                    buffer.AddText(builder.AsSpan());
+                #else
+                    buffer.AddText(builder.ToString());
+                #endif
+            }
+        }
+
         void AppendText(ReadOnlySpan<char> text) {
             Span<char> span = rubyBuffer.AsSpan();
             if (text.Length > span.Length) {
                 int newBufferSize = rubyBuffer.Length * 2;
                 while (text.Length > newBufferSize) {
-                    newBufferSize = rubyBuffer.Length * 2;
+                    newBufferSize *= 2;
                 }
 
                 ArrayPool<char>.Shared.Return(rubyBuffer);
