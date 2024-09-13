@@ -28,6 +28,12 @@ namespace TextExtraTags {
             this.tags = new();
         }
 
+        public ParserBuffer(int textCapacity, int tagsCapacity) {
+            this.textSize = 0;
+            this.textBuffer = ArrayPool<char>.Shared.Rent(textCapacity);
+            this.tags = new(tagsCapacity);
+        }
+
 
         public void ClearAll() {
             textSize = 0;

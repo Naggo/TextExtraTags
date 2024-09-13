@@ -6,7 +6,16 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public class ExtraTagCollection : IEnumerable<ExtraTagBase>, IDisposable {
-        List<ExtraTagBase> m_tags = new();
+        List<ExtraTagBase> m_tags;
+
+
+        public ExtraTagCollection() {
+            m_tags = new();
+        }
+
+        public ExtraTagCollection(int capacity) {
+            m_tags = new(capacity);
+        }
 
 
         public void AddExtraTag(ExtraTagBase tag) {
