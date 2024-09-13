@@ -10,36 +10,28 @@ namespace TextExtraTags.Editor {
 
     [CustomEditor(typeof(TextExtraTagsSettings), editorForChildClasses: false, isFallback=false)]
     public class TextExtraTagsSettingsEditor : Editor {
-
         SerializedProperty defaultPreset;
         SerializedProperty presets;
 
         TextExtraTagsSettings settings => target as TextExtraTagsSettings;
 
-        void OnEnable() {
+
+        void FindProperties() {
             defaultPreset = serializedObject.FindProperty("defaultPreset");
             presets = serializedObject.FindProperty("parserPresets");
         }
 
         public override void OnInspectorGUI() {
-            // DrawDefaultInspector();
+            if (defaultPreset == null) {
+                FindProperties();
+            }
 
             DrawPreset(defaultPreset, true);
             int i = 0;
             foreach (SerializedProperty preset in presets) {
-                GUILayout.Space(EditorGUIUtility.singleLineHeight);
                 DrawPreset(preset, false, i++);
             }
-
-            GUILayout.Space(EditorGUIUtility.singleLineHeight);
-            if (GUILayout.Button("Create new Preset")) {
-                int index = presets.arraySize;
-                presets.InsertArrayElementAtIndex(index);
-
-                var preset = presets.GetArrayElementAtIndex(index);
-                preset.FindPropertyRelative("name").stringValue = "New Parser";
-                preset.FindPropertyRelative("capacityLevel").intValue = 2;
-            }
+            DrawCreateButton();
 
             if (serializedObject.ApplyModifiedProperties()) {
                 settings.Parsers.Clear();
@@ -72,6 +64,7 @@ namespace TextExtraTags.Editor {
             }
             EditorGUI.indentLevel--;
 
+            EditorGUILayout.Space();
             EditorGUILayout.EndVertical();
         }
 
@@ -128,6 +121,22 @@ namespace TextExtraTags.Editor {
             }
 
             menu.ShowAsContext();
+        }
+
+        void DrawCreateButton() {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+
+            if (GUILayout.Button("Create new Preset")) {
+                int index = presets.arraySize;
+                presets.InsertArrayElementAtIndex(index);
+
+                var preset = presets.GetArrayElementAtIndex(index);
+                preset.FindPropertyRelative("name").stringValue = "New Parser";
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.EndVertical();
         }
     }
 }

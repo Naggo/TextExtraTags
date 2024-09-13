@@ -50,10 +50,6 @@ namespace TextExtraTags.Editor {
 
         public override void OnGUI(string searchContext)
         {
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-            EditorGUILayout.LabelField("ZString enabled");
-#endif
-
             var instance = TextExtraTagsSettings.Instance;
             bool isPersistent = EditorUtility.IsPersistent(instance);
             if (isPersistent)
@@ -71,7 +67,7 @@ namespace TextExtraTags.Editor {
 
             using (new EditorGUI.DisabledScope(!isPersistent))
             {
-                GUILayout.Space(EditorGUIUtility.singleLineHeight);
+                EditorGUILayout.Space();
                 _editor.OnInspectorGUI();
             }
         }
