@@ -23,7 +23,7 @@ namespace TextExtraTags.Standards {
         public override void Setup() {
             startIndex = 0;
             rubyLength = 0;
-            rubyBuffer = ArrayPool<char>.Shared.Rent(8);
+            rubyBuffer = ArrayPool<char>.Shared.Rent(16);
         }
 
         public override void Reset() {
