@@ -13,14 +13,16 @@ using UnityEngine;
 
 namespace TextExtraTags.Standards {
     public class RubyTagFilter : ExtraTagFilter {
+        public float rubySize;
+
         int startIndex;
-        int rubySize;
+        int rubyLength;
         char[] rubyBuffer;
 
 
         public override void Setup() {
             startIndex = 0;
-            rubySize = 0;
+            rubyLength = 0;
             rubyBuffer = ArrayPool<char>.Shared.Rent(8);
         }
 
@@ -40,9 +42,9 @@ namespace TextExtraTags.Standards {
                     return true;
                 }
             } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
-                if (rubySize > 0) {
+                if (rubyLength > 0) {
                     ProcessRuby(index, buffer, tagData);
-                    rubySize = 0;
+                    rubyLength = 0;
                 }
                 return true;
             }
@@ -58,21 +60,28 @@ namespace TextExtraTags.Standards {
                 var builder = new StringBuilder();
             #endif
             {
-                ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubySize);
+                ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
                 int rL = ruby.Length;
-                int kL2 = (index - startIndex) * 2;
+                int kL = index - startIndex;
+                float rHalf = rL * rubySize * 0.5f;
+                float kHalf = kL * 0.5f;
 
                 // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
-                float space = -(kL2 * 0.25f + rL * 0.25f);
-                builder.AppendFormat("<space={0:F2}em><voffset=1em><size=50%>", space);
+                float space = -(kHalf + rHalf);
+                builder.AppendFormat("<space={0:F2}em><voffset=1em><size={1:0.#%}>", space, rubySize);
                 builder.Append(ruby);
                 builder.Append("</size></voffset>");
 
                 // 後ろに付ける空白
-                space = (kL2 - rL) * 0.25f;
+                space = kHalf - rHalf;
                 if (space != 0) {
                     builder.AppendFormat("<space={0:F2}em>", space);
                 }
+
+                var tag = RubyTag.Create(startIndex, () => new RubyTag());
+                tag.baseLength = kL;
+                tag.rubyLength = rL;
+                buffer.AddExtraTag(tag);
 
                 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
                     buffer.AddText(builder.AsSpan());
@@ -95,7 +104,7 @@ namespace TextExtraTags.Standards {
                 span = rubyBuffer.AsSpan();
             }
             text.CopyTo(span);
-            rubySize = text.Length;
+            rubyLength = text.Length;
         }
     }
 }
