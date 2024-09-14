@@ -38,7 +38,9 @@ namespace TextExtraTags {
         public ParserFilters CreateFilters() {
             var filters = new ParserFilters();
             foreach (var feature in features) {
-                feature?.Register(filters);
+                if (feature is not null && feature.enabled) {
+                    feature.Register(filters);
+                }
             }
             return filters;
         }
