@@ -44,11 +44,11 @@ namespace TextExtraTags {
             }
         }
 
-        public ReadOnlySpan<char> Parse() {
+        public Parser Parse() {
             var parser = ParserUtility.GetParser(parserName);
             var buffer = parser.Parse(sourceText, extraTags).AsArraySegment();
             TextComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
-            return parser.AsSpan();
+            return parser;
         }
     }
 }
