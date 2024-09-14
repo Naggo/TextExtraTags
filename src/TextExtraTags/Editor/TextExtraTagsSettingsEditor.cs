@@ -127,7 +127,7 @@ namespace TextExtraTags.Editor {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.Space();
 
-            if (GUILayout.Button("Create new Preset")) {
+            if (GUILayout.Button("Create new Parser")) {
                 int index = presets.arraySize;
                 presets.InsertArrayElementAtIndex(index);
 
