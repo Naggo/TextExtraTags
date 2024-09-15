@@ -13,7 +13,7 @@ namespace TextExtraTags {
         [TextArea(5, 10)]
         public string sourceText;
 
-        public string parserName;
+        public string parserName = TextExtraTagsSettings.DefaultPresetName;
         public bool parseOnAwake;
 
         ExtraTagCollection _extraTags;
