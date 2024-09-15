@@ -44,6 +44,12 @@ namespace TextExtraTags {
             }
         }
 
+        void OnDestroy() {
+            if (_extraTags is not null) {
+                _extraTags.Clear();
+            }
+        }
+
         public Parser Parse() {
             var parser = ParserUtility.GetParser(parserName);
             var buffer = parser.Parse(sourceText, extraTags).AsArraySegment();
