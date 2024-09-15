@@ -23,6 +23,11 @@
             "name": "com.unity.ugui",
             "expression": "2.0.0",
             "define": "TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT"
+        },
+        {
+            "name": "com.cysharp.zstring",
+            "expression": "",
+            "define": "TEXTEXTRATAGS_ZSTRING_SUPPORT"
         }
     ],
     "noEngineReferences": false
