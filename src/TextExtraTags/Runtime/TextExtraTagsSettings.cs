@@ -35,6 +35,7 @@ namespace TextExtraTags {
         [SerializeField]
         List<ParserPreset> parserPresets;
 
+        Parser defaultParser;
         Dictionary<string, Parser> parsers;
 
 
@@ -44,11 +45,16 @@ namespace TextExtraTags {
 
 
         public void ResetParsers() {
+            defaultParser = null;
             if (parsers is null || parsers.Count == 0) return;
             parsers.Clear();
         }
 
         public Parser GetParser(string name, bool returnDefault = true) {
+            if (name == DefaultPresetName) {
+                return GetDefaultParser();
+            }
+
             Parser parser;
             if (parsers is null) {
                 parsers = new();
@@ -59,7 +65,7 @@ namespace TextExtraTags {
             var preset = GetPreset(name);
             if (preset is null) {
                 if (returnDefault) {
-                    return GetParser(DefaultPresetName, false);
+                    return GetDefaultParser();
                 } else {
                     return null;
                 }
@@ -69,14 +75,26 @@ namespace TextExtraTags {
             return parser;
         }
 
+        public Parser GetDefaultParser() {
+            if (defaultParser is null) {
+                defaultParser = new Parser(defaultPreset);
+            }
+            return defaultParser;
+        }
+
         public ParserPreset GetPreset(string name) {
             if (name == DefaultPresetName) {
-                return defaultPreset;
+                return GetDefaultPreset();
             }
+
             foreach (var preset in parserPresets) {
                 if (name == preset.Name) return preset;
             }
             return null;
+        }
+
+        public ParserPreset GetDefaultPreset() {
+            return defaultPreset;
         }
 
         public IEnumerable<string> GetNames() {
