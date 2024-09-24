@@ -74,11 +74,7 @@ namespace TextExtraTags {
         }
 
         public void Dispose() {
-            try {
-                Clear();
-            } catch (ObjectDisposedException) {
-                m_tags.Clear();
-            }
+            Clear();
         }
     }
 }

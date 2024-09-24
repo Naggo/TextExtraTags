@@ -16,7 +16,7 @@ namespace TextExtraTags {
         }
 
         static void Return(T tag) {
-            if (tag.Index < 0) throw new ObjectDisposedException(nameof(tag), "Tag has already been returned to the pool");
+            if (tag.Index < 0) return;
             tag.Reset();
             tag._index = -1;
             ExtraTagPool<T>.ReturnItem(tag);

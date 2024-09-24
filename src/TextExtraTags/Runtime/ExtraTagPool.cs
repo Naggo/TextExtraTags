@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 
 namespace TextExtraTags {
@@ -17,6 +18,7 @@ namespace TextExtraTags {
         }
 
         public static void ReturnItem(T item) {
+            Assert.IsFalse(stack.Contains(item));
             stack.Push(item);
         }
     }
