@@ -27,7 +27,7 @@ namespace TextExtraTags {
 
         public sealed override int Index => _index;
 
-        internal sealed override void Return() {
+        public sealed override void Return() {
             Assert.IsTrue(this is T, "Invalid inheritance");
             Return(this as T);
         }
