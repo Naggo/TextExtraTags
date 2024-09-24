@@ -44,7 +44,7 @@ namespace TextExtraTags {
             return new string(textBuffer, 0, textSize);
         }
 
-        public Parser Parse(ReadOnlySpan<char> source, ExtraTagCollection resultTags) {
+        public Parser Parse(ReadOnlySpan<char> source, IExtraTagCollection resultTags) {
             buffer.ClearAll();
             resultTags.Clear();
             textSize = 0;
@@ -140,7 +140,9 @@ namespace TextExtraTags {
                 }
 
                 if (buffer.HasTags) {
-                    resultTags.AddExtraTags(buffer.Tags);
+                    foreach (ExtraTagBase tag in buffer.Tags) {
+                        resultTags.Add(tag);
+                    }
                 }
 
                 if (buffer.Modified) {

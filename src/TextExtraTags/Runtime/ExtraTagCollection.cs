@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 namespace TextExtraTags {
-    public class ExtraTagCollection : IReadOnlyExtraTagCollection, IDisposable {
+    public class ExtraTagCollection : IExtraTagCollection, IDisposable {
         List<ExtraTagBase> m_tags;
 
 
@@ -18,11 +18,22 @@ namespace TextExtraTags {
         }
 
 
+        [System.Obsolete("Use Add() instead.")]
         public void AddExtraTag(ExtraTagBase tag) {
+            Add(tag);
+        }
+
+        [System.Obsolete("Use AddRange() instead.")]
+        public void AddExtraTags(IEnumerable<ExtraTagBase> tags) {
+            AddRange(tags);
+        }
+
+
+        public void Add(ExtraTagBase tag) {
             m_tags.Add(tag);
         }
 
-        public void AddExtraTags(IEnumerable<ExtraTagBase> tags) {
+        public void AddRange(IEnumerable<ExtraTagBase> tags) {
             m_tags.AddRange(tags);
         }
 
@@ -63,7 +74,11 @@ namespace TextExtraTags {
         }
 
         public void Dispose() {
-            Clear();
+            try {
+                Clear();
+            } catch (ObjectDisposedException) {
+                m_tags.Clear();
+            }
         }
     }
 }
