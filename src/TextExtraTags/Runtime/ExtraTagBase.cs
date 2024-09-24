@@ -7,6 +7,6 @@ namespace TextExtraTags {
     public abstract class ExtraTagBase {
         public abstract int Index { get; }
 
-        internal abstract void Return();
+        public abstract void Return();
     }
 }
