@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TextExtraTags {
     public interface IReadOnlyExtraTagCollection : IEnumerable<ExtraTagBase> {
-        public T GetExtraTagOrDefault<T>(int index) where T: ExtraTagBase;
+        public int Count { get; }
         public bool TryGetExtraTag<T>(int index, out T tag) where T: ExtraTagBase;
     }
 }
