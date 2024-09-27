@@ -8,6 +8,8 @@ namespace TextExtraTags {
     public class ExtraTagCollection : IExtraTagCollection, IDisposable {
         List<ExtraTagBase> m_tags;
 
+        public int Count => m_tags.Count;
+
 
         public ExtraTagCollection() {
             m_tags = new();
@@ -73,7 +75,7 @@ namespace TextExtraTags {
             return m_tags.GetEnumerator();
         }
 
-        public void Dispose() {
+        void IDisposable.Dispose() {
             Clear();
         }
     }
