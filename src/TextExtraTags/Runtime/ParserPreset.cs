@@ -19,7 +19,7 @@ namespace TextExtraTags {
         List<ExtraTagFeature> features;
 
         public string Name => name;
-        public bool IsDefault => name == TextExtraTagsSettings.DefaultPresetName;
+        public bool IsDefault => this == TextExtraTagsSettings.Instance.GetDefaultPreset();
 
 
         public ParserPreset(string name, int capacityLevel) {

@@ -79,8 +79,8 @@ namespace TextExtraTags.Standards {
                 }
 
                 var tag = RubyTag.Create(startIndex, () => new RubyTag());
-                tag.baseLength = kL;
-                tag.rubyLength = rL;
+                tag.BaseLength = kL;
+                tag.RubyLength = rL;
                 buffer.AddExtraTag(tag);
 
                 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
