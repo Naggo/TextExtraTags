@@ -16,19 +16,23 @@ namespace TextExtraTags {
         public string parserName = TextExtraTagsSettings.DefaultPresetName;
         public bool parseOnAwake;
 
-        ExtraTagCollection _extraTags;
-        ExtraTagCollection extraTags {
+        ExtraTagCollection _mutableExtraTags;
+        ExtraTagCollection mutableExtraTags {
             get {
-                if (_extraTags is null) {
-                    _extraTags = new();
+                if (_mutableExtraTags is null) {
+                    _mutableExtraTags = new();
                 }
-                return _extraTags;
+                return _mutableExtraTags;
             }
         }
+
+        public IReadOnlyExtraTagCollection extraTags => mutableExtraTags;
+
+        [System.Obsolete("Use extraTags.")]
         public IReadOnlyExtraTagCollection ExtraTags => extraTags;
 
         TMP_Text _textComponent;
-        public TMP_Text TextComponent {
+        public TMP_Text textComponent {
             get {
                 if (_textComponent is null) {
                     _textComponent = GetComponent<TMP_Text>();
@@ -36,6 +40,9 @@ namespace TextExtraTags {
                 return _textComponent;
             }
         }
+
+        [System.Obsolete("Use textComponent.")]
+        public TMP_Text TextComponent => textComponent;
 
 
         void Awake() {
@@ -45,15 +52,20 @@ namespace TextExtraTags {
         }
 
         void OnDestroy() {
-            if (_extraTags is not null) {
-                _extraTags.Clear();
+            if (_mutableExtraTags is not null) {
+                _mutableExtraTags.Clear();
             }
         }
 
+
+        public Parser GetParser() {
+            return ParserUtility.GetParser(parserName);
+        }
+
         public Parser Parse() {
-            var parser = ParserUtility.GetParser(parserName);
-            var buffer = parser.Parse(sourceText, extraTags).AsArraySegment();
-            TextComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
+            var parser = GetParser();
+            var buffer = parser.Parse(sourceText, mutableExtraTags).AsArraySegment();
+            textComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
             return parser;
         }
     }
