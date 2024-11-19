@@ -8,6 +8,8 @@ namespace TextExtraTags.Standards {
         public int BaseLength { get; internal set; }
         public int RubyLength { get; internal set; }
 
+        public int EndTagIndex => Index + BaseLength;
+
         [System.Obsolete("Use BaseLength.")]
         public int baseLength => BaseLength;
 
