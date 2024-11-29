@@ -2,8 +2,14 @@
 
 Add new text parser.
 
------
+## Installation URL (for UPM)
 
+Recent release version:
+```
+https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags#v1.1.0
+```
+
+Latest developments:
 ```
 https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 ```
