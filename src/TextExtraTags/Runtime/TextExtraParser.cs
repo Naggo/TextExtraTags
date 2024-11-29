@@ -47,7 +47,7 @@ namespace TextExtraTags {
 
         void Awake() {
             if (parseOnAwake) {
-                Parse();
+                ParseAndSetText();
             }
         }
 
@@ -62,11 +62,30 @@ namespace TextExtraTags {
             return ParserUtility.GetParser(parserName);
         }
 
-        public Parser Parse() {
+        public Parser ParseText() {
+            return ParseText(sourceText);
+        }
+
+        public Parser ParseText(ReadOnlySpan<char> source) {
             var parser = GetParser();
-            var buffer = parser.Parse(sourceText, mutableExtraTags).AsArraySegment();
+            return parser.Parse(source, mutableExtraTags);
+        }
+
+        public Parser ParseAndSetText() {
+            return ParseAndSetText(sourceText);
+        }
+
+        public Parser ParseAndSetText(ReadOnlySpan<char> source) {
+            var parser = ParseText(source);
+            var buffer = parser.AsArraySegment();
             textComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
             return parser;
+        }
+
+
+        [System.Obsolete("Use ParseAndSetText() instead.")]
+        public Parser Parse() {
+            return ParseAndSetText();
         }
     }
 }
