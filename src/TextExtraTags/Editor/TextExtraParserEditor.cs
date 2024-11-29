@@ -40,7 +40,7 @@ namespace TextExtraTags.Editor {
             EditorGUILayout.PropertyField(parseOnAwake);
 
             if (serializedObject.ApplyModifiedProperties()) {
-                (target as TextExtraParser).Parse();
+                (target as TextExtraParser).ParseAndSetText();
             }
         }
 
