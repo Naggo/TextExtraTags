@@ -59,6 +59,14 @@ namespace TextExtraTags {
             return false;
         }
 
+        public IEnumerable<T> GetExtraTags<T>(int index) where T: ExtraTagBase {
+            foreach (var item in m_tags) {
+                if (item.Index == index && item is T result) {
+                    yield return result;
+                }
+            }
+        }
+
         public void Clear() {
             foreach (var tag in m_tags) {
                 tag.Return();
