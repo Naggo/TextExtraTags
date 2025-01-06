@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 
 namespace TextExtraTags {
-    public interface IExtraTagCollection : IReadOnlyExtraTagCollection {
+    public interface IExtraTagCollection {
         public void Add(ExtraTagBase tag);
         public void Clear();
     }
