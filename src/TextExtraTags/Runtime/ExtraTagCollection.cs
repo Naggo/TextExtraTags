@@ -1,11 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 
 namespace TextExtraTags {
-    public class ExtraTagCollection : IExtraTagCollection, IDisposable {
+    public class ExtraTagCollection : IExtraTagCollection, IReadOnlyExtraTagCollection, IDisposable {
         List<ExtraTagBase> m_tags;
 
         public int Count => m_tags.Count;
@@ -17,17 +16,6 @@ namespace TextExtraTags {
 
         public ExtraTagCollection(int capacity) {
             m_tags = new(capacity);
-        }
-
-
-        [System.Obsolete("Use Add() instead.")]
-        public void AddExtraTag(ExtraTagBase tag) {
-            Add(tag);
-        }
-
-        [System.Obsolete("Use AddRange() instead.")]
-        public void AddExtraTags(IEnumerable<ExtraTagBase> tags) {
-            AddRange(tags);
         }
 
 
