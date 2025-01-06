@@ -1,8 +1,6 @@
 #if TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -28,8 +26,6 @@ namespace TextExtraTags {
 
         public IReadOnlyExtraTagCollection extraTags => mutableExtraTags;
 
-        [System.Obsolete("Use extraTags.")]
-        public IReadOnlyExtraTagCollection ExtraTags => extraTags;
 
         TMP_Text _textComponent;
         public TMP_Text textComponent {
@@ -40,9 +36,6 @@ namespace TextExtraTags {
                 return _textComponent;
             }
         }
-
-        [System.Obsolete("Use textComponent.")]
-        public TMP_Text TextComponent => textComponent;
 
 
         void Awake() {
@@ -80,12 +73,6 @@ namespace TextExtraTags {
             var buffer = parser.AsArraySegment();
             textComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
             return parser;
-        }
-
-
-        [System.Obsolete("Use ParseAndSetText() instead.")]
-        public Parser Parse() {
-            return ParseAndSetText();
         }
     }
 }
