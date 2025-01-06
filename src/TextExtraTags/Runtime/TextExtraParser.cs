@@ -26,7 +26,6 @@ namespace TextExtraTags {
 
         public IReadOnlyExtraTagCollection extraTags => mutableExtraTags;
 
-
         TMP_Text _textComponent;
         public TMP_Text textComponent {
             get {
