@@ -1,15 +1,12 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 
 namespace TextExtraTags {
-    public ref struct ParserTagData {
-        ReadOnlySpan<char> source;
-        int start;
-        int end;
-        int separator;
+    public readonly ref struct ParserTagData {
+        readonly ReadOnlySpan<char> source;
+        readonly int start;
+        readonly int end;
+        readonly int separator;
 
         public int Index => start;
         public int Length => (end - start) + 1;

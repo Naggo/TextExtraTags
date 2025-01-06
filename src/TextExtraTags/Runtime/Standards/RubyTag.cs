@@ -77,28 +77,26 @@ namespace TextExtraTags.Standards {
             rubyBuffer = null;
         }
 
-        public override bool ProcessTagData(
-                int index, ParserBuffer buffer, in ParserTagData tagData) {
+        public override void ProcessTagData(int index, ref ParserFilterContext context) {
+            var tagData = context.TagData;
             if (tagData.IsName("ruby") || tagData.IsName("r")) {
                 var ruby = tagData.Value;
                 if (ruby.Length > 0) {
                     startIndex = index;
                     AppendText(tagData.Value);
-                    return true;
+                    context.ExcludeFromSourceText = true;
                 }
             } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubyLength > 0) {
-                    ProcessRuby(index, buffer, tagData);
+                    ProcessRuby(index, ref context);
                     rubyLength = 0;
                 }
-                return true;
+                context.ExcludeFromSourceText = true;
             }
-
-            return false;
         }
 
 
-        void ProcessRuby(int index, ParserBuffer buffer, in ParserTagData tagData) {
+        void ProcessRuby(int index, ref ParserFilterContext context) {
 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
             using (var builder = ZString.CreateStringBuilder(true))
 #else
@@ -126,12 +124,12 @@ namespace TextExtraTags.Standards {
                 var tag = RubyTag.Create(startIndex, () => new RubyTag());
                 tag.BaseLength = kL;
                 tag.RubyLength = rL;
-                buffer.AddExtraTag(tag);
+                context.Buffer.AddExtraTag(tag);
 
 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                buffer.AddText(builder.AsSpan());
+                context.Buffer.AddText(builder.AsSpan());
 #else
-                buffer.AddText(builder.ToString());
+                context.Buffer.AddText(builder.ToString());
 #endif
             }
         }
