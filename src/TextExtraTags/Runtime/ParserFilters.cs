@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 
 namespace TextExtraTags {
@@ -12,12 +11,22 @@ namespace TextExtraTags {
             filters.Add(filter);
         }
 
-        public bool ProcessTagData(int index, ParserBuffer buffer, in ParserTagData tagData) {
-            bool isParsed = false;
+        public void ProcessTagData(int index, ref ParserFilterContext context) {
             foreach (var filter in filters) {
-                isParsed |= filter.ProcessTagData(index, buffer, tagData);
+                filter.ProcessTagData(index, ref context);
+                if (context.SkipOtherFilters) {
+                    break;
+                }
             }
-            return isParsed;
+        }
+
+        public void ProcessBufferedTagData(ref ParserFilterContext context) {
+            foreach (var filter in filters) {
+                filter.ProcessBufferedTagData(ref context);
+                if (context.SkipOtherFilters) {
+                    break;
+                }
+            }
         }
 
         public void Setup() {
