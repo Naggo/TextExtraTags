@@ -4,7 +4,7 @@ using System;
 namespace TextExtraTags {
     public abstract class ExtraTag<T> : ExtraTagBase where T : ExtraTag<T> {
         public static T Create(int index, Func<T> ctor) {
-            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Invalid index");
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, "Invalid index");
             T tag = ExtraTagPool<T>.GetItem(ctor);
             tag._index = index;
             tag.Initialize();
@@ -27,7 +27,7 @@ namespace TextExtraTags {
             if (this is T tag) {
                 Return(tag);
             } else {
-                throw new Exception("Invalid inheritance");
+                throw new InvalidOperationException("Invalid inheritance");
             }
         }
 
