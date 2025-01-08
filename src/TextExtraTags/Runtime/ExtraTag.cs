@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Assertions;
 
 
 namespace TextExtraTags {
@@ -25,8 +24,11 @@ namespace TextExtraTags {
         public sealed override int Index => _index;
 
         public sealed override void Return() {
-            Assert.IsTrue(this is T, "Invalid inheritance");
-            Return(this as T);
+            if (this is T tag) {
+                Return(tag);
+            } else {
+                throw new Exception("Invalid inheritance");
+            }
         }
 
 
