@@ -42,8 +42,13 @@ namespace TextExtraTags {
         }
 
         public Parser Parse(ReadOnlySpan<char> source, IExtraTagCollection resultTags) {
+            var wrapper = new ParserResultTagsReceiver(resultTags);
+            return Parse(source, ref wrapper);
+        }
+
+        public Parser Parse<T>(ReadOnlySpan<char> source, ref T result) where T : IParserResultReceiver {
             buffer.ClearAll();
-            resultTags.Clear();
+            result.Clear();
             textSize = 0;
 
             filters.Setup();
@@ -109,7 +114,7 @@ namespace TextExtraTags {
 
                 if (buffer.HasTags) {
                     foreach (ExtraTag tag in buffer.Tags) {
-                        resultTags.Add(tag);
+                        result.AddExtraTag(tag);
                     }
                 }
 
