@@ -108,7 +108,7 @@ namespace TextExtraTags {
                 }
 
                 if (buffer.HasTags) {
-                    foreach (ExtraTagBase tag in buffer.Tags) {
+                    foreach (ExtraTag tag in buffer.Tags) {
                         resultTags.Add(tag);
                     }
                 }

@@ -9,14 +9,14 @@ namespace TextExtraTags {
 
         int textSize;
         char[] textBuffer;
-        List<ExtraTagBase> tags;
+        List<ExtraTag> tags;
 
         public bool HasText => textSize > 0;
         public bool HasTags => tags.Count > 0;
         public bool Modified => HasText || HasTags;
 
         public ReadOnlySpan<char> Text => textBuffer.AsSpan(0, textSize);
-        public IEnumerable<ExtraTagBase> Tags => tags;
+        public IEnumerable<ExtraTag> Tags => tags;
 
 
         public ParserBuffer() {
@@ -51,7 +51,7 @@ namespace TextExtraTags {
             textSize += text.Length;
         }
 
-        public void AddExtraTag(ExtraTagBase tag) {
+        public void AddExtraTag(ExtraTag tag) {
             tags.Add(tag);
         }
     }
