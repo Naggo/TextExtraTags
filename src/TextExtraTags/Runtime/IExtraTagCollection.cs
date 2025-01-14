@@ -1,7 +1,7 @@
 
 
 namespace TextExtraTags {
-    public interface IExtraTagCollection {
+    public interface IExtraTagCollection : IReadOnlyExtraTagCollection {
         public void Add(ExtraTag tag);
         public void Clear();
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 
 namespace TextExtraTags {
-    public class ExtraTagCollection : IExtraTagCollection, IReadOnlyExtraTagCollection, IDisposable {
+    public class ExtraTagCollection : IExtraTagCollection, IDisposable {
         List<ExtraTag> m_tags;
 
         public int Count => m_tags.Count;
