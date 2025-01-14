@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 
 namespace TextExtraTags {
-    static class ExtraTagPool<T> where T : ExtraTagBase {
+    static class ExtraTagPool<T> {
         static Stack<T> stack = new();
 
         public static T GetItem(Func<T> ctor) {

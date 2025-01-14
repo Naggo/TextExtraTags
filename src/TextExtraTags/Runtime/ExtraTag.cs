@@ -2,7 +2,12 @@ using System;
 
 
 namespace TextExtraTags {
-    public abstract class ExtraTag<T> : ExtraTagBase where T : ExtraTag<T> {
+    public abstract class ExtraTag {
+        public abstract int Index { get; }
+    }
+
+
+    public abstract class ExtraTag<T> : ExtraTag, IExtraTagInternal where T : ExtraTag<T> {
         public static T Create(int index, Func<T> ctor) {
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, "Invalid index");
             T tag = ExtraTagPool<T>.GetItem(ctor);
@@ -12,7 +17,7 @@ namespace TextExtraTags {
         }
 
         static void Return(T tag) {
-            if (tag.Index < 0) return;
+            if (tag.Index < 0) throw new InvalidOperationException("Already returned");
             tag.Reset();
             tag._index = -1;
             ExtraTagPool<T>.ReturnItem(tag);
@@ -23,7 +28,9 @@ namespace TextExtraTags {
 
         public sealed override int Index => _index;
 
-        public sealed override void Return() {
+        bool IExtraTagInternal.IsActive => _index >= 0;
+
+        void IExtraTagInternal.ReturnToPool() {
             if (this is T tag) {
                 Return(tag);
             } else {

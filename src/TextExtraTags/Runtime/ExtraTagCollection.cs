@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace TextExtraTags {
     public class ExtraTagCollection : IExtraTagCollection, IReadOnlyExtraTagCollection, IDisposable {
-        List<ExtraTagBase> m_tags;
+        List<ExtraTag> m_tags;
 
         public int Count => m_tags.Count;
 
@@ -19,15 +19,15 @@ namespace TextExtraTags {
         }
 
 
-        public void Add(ExtraTagBase tag) {
+        public void Add(ExtraTag tag) {
             m_tags.Add(tag);
         }
 
-        public void AddRange(IEnumerable<ExtraTagBase> tags) {
+        public void AddRange(IEnumerable<ExtraTag> tags) {
             m_tags.AddRange(tags);
         }
 
-        public T GetExtraTagOrDefault<T>(int index) where T: ExtraTagBase {
+        public T GetExtraTagOrDefault<T>(int index) where T: ExtraTag {
             foreach (var item in m_tags) {
                 if (item.Index == index && item is T result) {
                     return result;
@@ -36,7 +36,7 @@ namespace TextExtraTags {
             return default;
         }
 
-        public bool TryGetExtraTag<T>(int index, out T tag) where T: ExtraTagBase {
+        public bool TryGetExtraTag<T>(int index, out T tag) where T: ExtraTag {
             foreach (var item in m_tags) {
                 if (item.Index == index && item is T result) {
                     tag = result;
@@ -47,7 +47,7 @@ namespace TextExtraTags {
             return false;
         }
 
-        public IEnumerable<T> GetExtraTags<T>(int index) where T: ExtraTagBase {
+        public IEnumerable<T> GetExtraTags<T>(int index) where T: ExtraTag {
             foreach (var item in m_tags) {
                 if (item.Index == index && item is T result) {
                     yield return result;
@@ -57,13 +57,15 @@ namespace TextExtraTags {
 
         public void Clear() {
             foreach (var tag in m_tags) {
-                tag.Return();
+                if (tag is IExtraTagInternal tagInternal && tagInternal.IsActive) {
+                    tagInternal.ReturnToPool();
+                }
             }
             m_tags.Clear();
         }
 
 
-        public IEnumerator<ExtraTagBase> GetEnumerator() {
+        public IEnumerator<ExtraTag> GetEnumerator() {
             return m_tags.GetEnumerator();
         }
 
