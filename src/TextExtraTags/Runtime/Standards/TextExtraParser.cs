@@ -88,6 +88,10 @@ namespace TextExtraTags {
                 }
             }
         }
+
+        public IEnumerable<ExtraTag> GetAllExtraTags() {
+            return extraTags;
+        }
     }
 }
 

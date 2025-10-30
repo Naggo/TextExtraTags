@@ -1,12 +1,7 @@
 using System;
 using System.Buffers;
+using System.Globalization;
 using UnityEngine;
-
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-    using Cysharp.Text;
-#else
-    using System.Text;
-#endif
 
 
 /*
@@ -105,8 +100,6 @@ namespace TextExtraTags.Standards {
             ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
             int rL = ruby.Length;
             int kL = index - startIndex;
-            float rHalf = rL * rubySize * 0.5f;
-            float kHalf = kL * 0.5f;
 
             var tag = new RubyTag();
             tag.index = startIndex;
@@ -116,29 +109,28 @@ namespace TextExtraTags.Standards {
 
             if (!convertTag) return;
 
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-            using (var builder = ZString.CreateStringBuilder(true))
-#else
-            var builder = new StringBuilder();
-#endif
-            {
-                // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
-                float space = -(kHalf + rHalf);
-                builder.AppendFormat("<space={0:F2}em><voffset=1em><size={1:0.#%}>", space, rubySize);
-                builder.Append(ruby);
-                builder.Append("</size></voffset>");
+            // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
+            int count;
+            float rHalf = rL * rubySize * 0.5f;
+            float kHalf = kL * 0.5f;
+            float space = -(kHalf + rHalf);
+            context.AddText("<space=");
+            space.TryFormat(context.GetTextSpan(32), out count, "F2", CultureInfo.InvariantCulture);
+            context.AddTextLength(count);
+            context.AddText("em><voffset=1em><size=");
+            rubySize.TryFormat(context.GetTextSpan(32), out count, "0.#%", CultureInfo.InvariantCulture);
+            context.AddTextLength(count);
+            context.AddText(">");
+            context.AddText(ruby);
+            context.AddText("</size></voffset>");
 
-                // 後ろに付ける空白
-                space = kHalf - rHalf;
-                if (space != 0) {
-                    builder.AppendFormat("<space={0:F2}em>", space);
-                }
-
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                context.AddText(builder.AsSpan());
-#else
-                context.AddText(builder.ToString());
-#endif
+            // 後ろに付ける空白
+            space = kHalf - rHalf;
+            if (space != 0) {
+                context.AddText("<space=");
+                space.TryFormat(context.GetTextSpan(32), out count, "F2", CultureInfo.InvariantCulture);
+                context.AddTextLength(count);
+                context.AddText("em>");
             }
         }
 
