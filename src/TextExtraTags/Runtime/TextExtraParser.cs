@@ -1,6 +1,7 @@
 #if TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -8,31 +9,21 @@ using TMPro;
 namespace TextExtraTags {
     [RequireComponent(typeof(TMP_Text))]
     public class TextExtraParser : MonoBehaviour {
+        public TMP_Text textComponent;
+
         [TextArea(5, 10)]
         public string sourceText;
 
         public string parserName = TextExtraTagsSettings.DefaultPresetName;
         public bool parseOnAwake;
 
-        ExtraTagCollection _mutableExtraTags;
-        ExtraTagCollection mutableExtraTags {
+        ICollection<ExtraTag> _extraTags;
+        ICollection<ExtraTag> extraTags {
             get {
-                if (_mutableExtraTags is null) {
-                    _mutableExtraTags = new();
+                if (_extraTags is null) {
+                    _extraTags = new List<ExtraTag>();
                 }
-                return _mutableExtraTags;
-            }
-        }
-
-        public IReadOnlyExtraTagCollection extraTags => mutableExtraTags;
-
-        TMP_Text _textComponent;
-        public TMP_Text textComponent {
-            get {
-                if (_textComponent is null) {
-                    _textComponent = GetComponent<TMP_Text>();
-                }
-                return _textComponent;
+                return _extraTags;
             }
         }
 
@@ -44,9 +35,7 @@ namespace TextExtraTags {
         }
 
         void OnDestroy() {
-            if (_mutableExtraTags is not null) {
-                _mutableExtraTags.Clear();
-            }
+            extraTags.Clear();
         }
 
 
@@ -60,7 +49,7 @@ namespace TextExtraTags {
 
         public Parser ParseText(ReadOnlySpan<char> source) {
             var parser = GetParser();
-            return parser.Parse(source, mutableExtraTags);
+            return parser.Parse(source, extraTags);
         }
 
         public Parser ParseAndSetText() {
@@ -69,9 +58,35 @@ namespace TextExtraTags {
 
         public Parser ParseAndSetText(ReadOnlySpan<char> source) {
             var parser = ParseText(source);
-            var buffer = parser.AsArraySegment();
-            textComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
+            if (textComponent) {
+                var buffer = parser.AsArraySegment();
+                textComponent.SetCharArray(buffer.Array, buffer.Offset, buffer.Count);
+            }
             return parser;
+        }
+
+
+        public void OverrideCollection(ICollection<ExtraTag> collection) {
+            _extraTags = collection;
+        }
+
+        public bool TryGetExtraTag<T>(int index, out T tag) where T: ExtraTag {
+            foreach (var item in extraTags) {
+                if (item.Index == index && item is T result) {
+                    tag = result;
+                    return true;
+                }
+            }
+            tag = default;
+            return false;
+        }
+
+        public IEnumerable<T> GetExtraTags<T>(int index) where T: ExtraTag {
+            foreach (var item in extraTags) {
+                if (item.Index == index && item is T result) {
+                    yield return result;
+                }
+            }
         }
     }
 }

@@ -15,26 +15,26 @@ namespace TextExtraTags.Editor {
     public class TextExtraParserEditor : Editor {
         static string[] parserNames;
 
+        SerializedProperty textComponent;
         SerializedProperty sourceText;
         SerializedProperty parserName;
         SerializedProperty parseOnAwake;
 
 
-        void OnEnable() {
-            parserNames = ParserUtility.GetParserNames().ToArray();
-        }
-
         void FindProperties() {
+            textComponent = serializedObject.FindProperty("textComponent");
             sourceText = serializedObject.FindProperty("sourceText");
             parserName = serializedObject.FindProperty("parserName");
             parseOnAwake = serializedObject.FindProperty("parseOnAwake");
         }
+
 
         public override void OnInspectorGUI() {
             if (sourceText == null) {
                 FindProperties();
             }
 
+            EditorGUILayout.PropertyField(textComponent);
             EditorGUILayout.PropertyField(sourceText);
             DrawParserName();
             EditorGUILayout.PropertyField(parseOnAwake);
@@ -46,6 +46,12 @@ namespace TextExtraTags.Editor {
 
         void DrawParserName() {
             string name = parserName.stringValue;
+
+            string[] parserNames = ParserUtility.GetParserNames().ToArray();
+            if (!ArrayUtility.Contains(parserNames, name)) {
+                ArrayUtility.Insert(ref parserNames, 0, name);
+            }
+
             DrawStringPopup(parserName.displayName, ref name, parserNames);
             parserName.stringValue = name;
         }

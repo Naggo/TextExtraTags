@@ -11,7 +11,7 @@ namespace TextExtraTags {
             filters.Add(filter);
         }
 
-        public void ProcessTagData(int index, ref ParserFilterContext context) {
+        public void ProcessTagData(int index, ref ParserContext context) {
             foreach (var filter in filters) {
                 filter.ProcessTagData(index, ref context);
                 if (context.SkipOtherFilters) {
@@ -20,7 +20,7 @@ namespace TextExtraTags {
             }
         }
 
-        public void ProcessBufferedTagData(ref ParserFilterContext context) {
+        public void ProcessBufferedTagData(ref ParserContext context) {
             foreach (var filter in filters) {
                 filter.ProcessBufferedTagData(ref context);
                 if (context.SkipOtherFilters) {

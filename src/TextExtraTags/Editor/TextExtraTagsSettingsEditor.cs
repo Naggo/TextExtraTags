@@ -34,13 +34,14 @@ namespace TextExtraTags.Editor {
             DrawCreateButton();
 
             if (serializedObject.ApplyModifiedProperties()) {
-                settings.ResetParsers();
+                settings.ResetAllParsers();
             }
         }
 
         void DrawPreset(SerializedProperty preset, bool isDefault, int index = 0) {
             SerializedProperty name = preset.FindPropertyRelative("name");
             SerializedProperty capacityLevel = preset.FindPropertyRelative("capacityLevel");
+            SerializedProperty iterationLimit = preset.FindPropertyRelative("iterationLimit");
             SerializedProperty features = preset.FindPropertyRelative("features");
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -58,6 +59,7 @@ namespace TextExtraTags.Editor {
                 EditorGUILayout.PropertyField(name);
             }
             EditorGUILayout.PropertyField(capacityLevel);
+            EditorGUILayout.PropertyField(iterationLimit);
             EditorGUILayout.PropertyField(features);
             if (GUILayout.Button("Add Feature")) {
                 ShowFeatureMenu(features);
@@ -133,6 +135,8 @@ namespace TextExtraTags.Editor {
 
                 var preset = presets.GetArrayElementAtIndex(index);
                 preset.FindPropertyRelative("name").stringValue = "New Parser";
+                preset.FindPropertyRelative("capacityLevel").intValue = 1;
+                preset.FindPropertyRelative("iterationLimit").intValue = 2;
             }
 
             EditorGUILayout.Space();

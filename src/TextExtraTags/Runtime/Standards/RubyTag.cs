@@ -11,7 +11,7 @@ using UnityEngine;
 
 /*
 
-RubyTagFilter based on TextMeshProRuby
+RubyTagFilter is based on TextMeshProRuby
 https://github.com/ina-amagami/TextMeshProRuby
 
 MIT License
@@ -40,26 +40,31 @@ SOFTWARE.
 
 
 namespace TextExtraTags.Standards {
-    public class RubyTag : ExtraTag<RubyTag> {
+    public class RubyTag : ExtraTag {
+        internal int index;
+
         public int BaseLength { get; internal set; }
         public int RubyLength { get; internal set; }
 
+        public override int Index => index;
         public int EndTagIndex => Index + BaseLength;
     }
 
 
     public class RubyTagFeature : ExtraTagFeature {
+        public bool convertTag = true;
         [Min(0)]
         public float rubySize = 0.5f;
 
         public override void Register(ParserFilters filters) {
-            filters.AddFilter(new RubyTagFilter() { rubySize = rubySize });
+            filters.AddFilter(new RubyTagFilter() { rubySize = rubySize, convertTag = convertTag });
         }
     }
 
 
     public class RubyTagFilter : ExtraTagFilter {
         public float rubySize;
+        public bool convertTag;
 
         int startIndex;
         int rubyLength;
@@ -77,38 +82,46 @@ namespace TextExtraTags.Standards {
             rubyBuffer = null;
         }
 
-        public override void ProcessTagData(int index, ref ParserFilterContext context) {
+        public override void ProcessTagData(int index, ref ParserContext context) {
             var tagData = context.TagData;
             if (tagData.IsName("ruby") || tagData.IsName("r")) {
                 var ruby = tagData.Value;
                 if (ruby.Length > 0) {
                     startIndex = index;
-                    AppendText(tagData.Value);
-                    context.ExcludeFromSourceText = true;
+                    SetRubyText(tagData.Value);
+                    context.ExcludeFromText = true;
                 }
             } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubyLength > 0) {
                     ProcessRuby(index, ref context);
                     rubyLength = 0;
                 }
-                context.ExcludeFromSourceText = true;
+                context.ExcludeFromText = true;
             }
         }
 
 
-        void ProcessRuby(int index, ref ParserFilterContext context) {
+        void ProcessRuby(int index, ref ParserContext context) {
+            ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
+            int rL = ruby.Length;
+            int kL = index - startIndex;
+            float rHalf = rL * rubySize * 0.5f;
+            float kHalf = kL * 0.5f;
+
+            var tag = new RubyTag();
+            tag.index = startIndex;
+            tag.BaseLength = kL;
+            tag.RubyLength = rL;
+            context.AddExtraTag(tag);
+
+            if (!convertTag) return;
+
 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
             using (var builder = ZString.CreateStringBuilder(true))
 #else
             var builder = new StringBuilder();
 #endif
             {
-                ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
-                int rL = ruby.Length;
-                int kL = index - startIndex;
-                float rHalf = rL * rubySize * 0.5f;
-                float kHalf = kL * 0.5f;
-
                 // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
                 float space = -(kHalf + rHalf);
                 builder.AppendFormat("<space={0:F2}em><voffset=1em><size={1:0.#%}>", space, rubySize);
@@ -121,20 +134,15 @@ namespace TextExtraTags.Standards {
                     builder.AppendFormat("<space={0:F2}em>", space);
                 }
 
-                var tag = RubyTag.Create(startIndex, () => new RubyTag());
-                tag.BaseLength = kL;
-                tag.RubyLength = rL;
-                context.Buffer.AddExtraTag(tag);
-
 #if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                context.Buffer.AddText(builder.AsSpan());
+                context.AddText(builder.AsSpan());
 #else
-                context.Buffer.AddText(builder.ToString());
+                context.AddText(builder.ToString());
 #endif
             }
         }
 
-        void AppendText(ReadOnlySpan<char> text) {
+        void SetRubyText(ReadOnlySpan<char> text) {
             Span<char> span = rubyBuffer.AsSpan();
             if (text.Length > span.Length) {
                 int newBufferSize = rubyBuffer.Length * 2;

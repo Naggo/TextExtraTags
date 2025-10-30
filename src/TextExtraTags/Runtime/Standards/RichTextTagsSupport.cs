@@ -17,35 +17,35 @@ namespace TextExtraTags.Standards {
             noparseMode = false;
         }
 
-        public override void ProcessTagData(int index, ref ParserFilterContext context) {
+        public override void ProcessTagData(int index, ref ParserContext context) {
             ProcessRichTextTags(ref context);
         }
 
-        public override void ProcessBufferedTagData(ref ParserFilterContext context) {
+        public override void ProcessBufferedTagData(ref ParserContext context) {
             ProcessRichTextTags(ref context);
         }
 
 
-        void ProcessRichTextTags(ref ParserFilterContext context) {
+        void ProcessRichTextTags(ref ParserContext context) {
             var tagData = context.TagData;
             if (noparseMode) {
                 if (tagData.IsName("/noparse")) {
                     noparseMode = false;
-                    context.ExcludeFromParsedText = true;
+                    context.ExcludeFromCount = true;
                 }
                 context.SkipOtherFilters = true;
                 return;
             } else {
                 if (tagData.IsName("noparse")) {
                     noparseMode = true;
-                    context.ExcludeFromParsedText = true;
+                    context.ExcludeFromCount = true;
                     context.SkipOtherFilters = true;
                     return;
                 }
             }
 
             if (RichTextTagsUtility.IsRichTextTag(tagData)) {
-                context.ExcludeFromParsedText = true;
+                context.ExcludeFromCount = true;
                 context.SkipOtherFilters = true;
             }
         }

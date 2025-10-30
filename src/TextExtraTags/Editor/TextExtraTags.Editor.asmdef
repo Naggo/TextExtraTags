@@ -2,7 +2,8 @@
     "name": "TextExtraTags.Editor",
     "rootNamespace": "TextExtraTags.Editor",
     "references": [
-        "TextExtraTags"
+        "TextExtraTags",
+        "TextExtraTags.Standards"
     ],
     "includePlatforms": [
         "Editor"
