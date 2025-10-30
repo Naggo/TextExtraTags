@@ -24,7 +24,7 @@ namespace TextExtraTags {
         public string Name => name;
 
 
-        public ParserPreset(string name, int capacityLevel = 1, int iterationLimit = 1, IEnumerable<ExtraTagFeature> features = null) {
+        public ParserPreset(string name, int capacityLevel = 1, int iterationLimit = 2, IEnumerable<ExtraTagFeature> features = null) {
             this.name = name;
             this.capacityLevel = capacityLevel;
             this.iterationLimit = iterationLimit;

@@ -41,7 +41,7 @@ namespace TextExtraTags {
             results.Clear();
 
             filters.Setup();
-            ProcessText(source, results, 0, 0, 0);
+            ProcessText(source, results, 1, 0, 0);
             filters.Reset();
 
             return this;
@@ -79,17 +79,17 @@ namespace TextExtraTags {
                     if (iterationCount < iterationLimit) {
                         textCount = ProcessText(bufferSpan, results, iterationCount + 1, textCount, nextBufferStart + bufferSpan.Length);
                     } else {
-                        int remainBufferTextLength = bufferSpan.Length - sourceIndex;
+                        int remainBufferTextLength = bufferSpan.Length;
+                        textBuffer.AddText(bufferSpan);
                         textCount += remainBufferTextLength;
-                        textBuffer.AddText(bufferSpan.Slice(sourceIndex, remainBufferTextLength));
                     }
                     filterTextBuffer.SetLength(nextBufferStart);
                 }
             }
 
             int remainTextLength = source.Length - sourceIndex;
-            textCount += remainTextLength;
             textBuffer.AddText(source.Slice(sourceIndex, remainTextLength));
+            textCount += remainTextLength;
             return textCount;
         }
 
