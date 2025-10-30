@@ -9,6 +9,7 @@ namespace TextExtraTags {
 
         ParserTextBuffer textBuffer;
         ParserTextBuffer filterTextBuffer;
+        int iterationLimit;
 
         public string Name => preset.Name;
 
@@ -18,6 +19,7 @@ namespace TextExtraTags {
             this.filters = preset.CreateFilters();
             this.textBuffer = new ParserTextBuffer(preset.GetParserTextCapacity());
             this.filterTextBuffer = new ParserTextBuffer(preset.GetParserTextCapacity());
+            this.iterationLimit = preset.GetIterationLimit();
         }
 
 
@@ -34,86 +36,62 @@ namespace TextExtraTags {
         }
 
         public Parser Parse(ReadOnlySpan<char> source, ICollection<ExtraTag> results) {
-            return Parse(source, ref results);
-        }
-
-        public Parser Parse<T>(ReadOnlySpan<char> source, ref T results) where T : ICollection<ExtraTag> {
             textBuffer.Clear();
             filterTextBuffer.Clear();
             results.Clear();
 
             filters.Setup();
+            ProcessText(source, results, 0, 0, 0);
+            filters.Reset();
 
+            return this;
+        }
+
+
+        int ProcessText(ReadOnlySpan<char> source, ICollection<ExtraTag> results, int iterationCount, int textCount, int nextBufferStart) {
             int sourceIndex = 0;
-            int parsedIndex = 0;
             while (TryParseTag(source, sourceIndex, out ParserTagData tagData)) {
                 int textLength = tagData.Index - sourceIndex;
                 int textAndTagLength = textLength + tagData.Length;
-                parsedIndex += textLength;
+                textCount += textLength;
 
                 // フィルターにタグを渡す
                 var context = new ParserContext(tagData, filterTextBuffer, results);
-                filters.ProcessTagData(parsedIndex, ref context);
+                filters.ProcessTagData(textCount, ref context);
 
                 if (context.ExcludeFromText) {
                     // タグを除去する
                     textBuffer.AddText(source.Slice(sourceIndex, textLength));
                     sourceIndex += textAndTagLength;
                 } else if (context.ExcludeFromCount) {
-                    // タグを追加するが、タグの分のインデックスは加算しない
+                    // タグを追加するが、タグの分のカウントは加算しない
                     textBuffer.AddText(source.Slice(sourceIndex, textAndTagLength));
                     sourceIndex += textAndTagLength;
                 } else {
                     // タグを含めた文章の追加
                     textBuffer.AddText(source.Slice(sourceIndex, textAndTagLength));
-                    parsedIndex += tagData.Length;
+                    textCount += tagData.Length;
                     sourceIndex += textAndTagLength;
                 }
 
-                // バッファデータの処理
-                if (filterTextBuffer.HasText) {
-                    ReadOnlySpan<char> bufferSpan = filterTextBuffer.AsSpan();
-                    int bufferIndex = 0;
-                    while (TryParseTag(bufferSpan, bufferIndex, out ParserTagData bufferedTagData)) {
-                        int bufferTextLength = bufferedTagData.Index - bufferIndex;
-                        int bufferTextAndTagLength = bufferTextLength + bufferedTagData.Length;
-                        // フィルターにタグを渡す、追加のバッファ操作は認めない
-                        context = new ParserContext(bufferedTagData, filterTextBuffer, results);
-                        filters.ProcessBufferedTagData(ref context);
-                        if (context.ExcludeFromText) {
-                            // タグを除去する
-                            textBuffer.AddText(bufferSpan.Slice(bufferIndex, bufferTextLength));
-                            bufferIndex += bufferTextAndTagLength;
-                        } else if (context.ExcludeFromCount) {
-                            // タグを追加するが、タグの分のインデックスは加算しない
-                            textBuffer.AddText(bufferSpan.Slice(bufferIndex, bufferTextAndTagLength));
-                            parsedIndex += bufferTextLength;
-                            bufferIndex += bufferTextAndTagLength;
-                        } else {
-                            // タグを含めた文章の追加
-                            textBuffer.AddText(bufferSpan.Slice(bufferIndex, bufferTextAndTagLength));
-                            parsedIndex += bufferTextAndTagLength;
-                            bufferIndex += bufferTextAndTagLength;
-                        }
+                ReadOnlySpan<char> bufferSpan = filterTextBuffer.AsSpan().Slice(nextBufferStart);
+                if (!bufferSpan.IsEmpty) {
+                    if (iterationCount < iterationLimit) {
+                        textCount = ProcessText(bufferSpan, results, iterationCount + 1, textCount, nextBufferStart + bufferSpan.Length);
+                    } else {
+                        int remainBufferTextLength = bufferSpan.Length - sourceIndex;
+                        textCount += remainBufferTextLength;
+                        textBuffer.AddText(bufferSpan.Slice(sourceIndex, remainBufferTextLength));
                     }
-
-                    // 残りのバッファテキストの加算
-                    int remainBufferTextLength = bufferSpan.Length - bufferIndex;
-                    parsedIndex += remainBufferTextLength;
-                    textBuffer.AddText(bufferSpan.Slice(bufferIndex, remainBufferTextLength));
-                    filterTextBuffer.Clear();
+                    filterTextBuffer.SetLength(nextBufferStart);
                 }
             }
 
-            // 残りのソーステキストの加算
             int remainTextLength = source.Length - sourceIndex;
+            textCount += remainTextLength;
             textBuffer.AddText(source.Slice(sourceIndex, remainTextLength));
-
-            filters.Reset();
-
-            return this;
+            return textCount;
         }
-
 
         bool TryParseTag(ReadOnlySpan<char> source, int startIndex, out ParserTagData result) {
             int lbIndex = -1;

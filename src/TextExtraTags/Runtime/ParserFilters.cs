@@ -20,15 +20,6 @@ namespace TextExtraTags {
             }
         }
 
-        public void ProcessBufferedTagData(ref ParserContext context) {
-            foreach (var filter in filters) {
-                filter.ProcessBufferedTagData(ref context);
-                if (context.SkipOtherFilters) {
-                    break;
-                }
-            }
-        }
-
         public void Setup() {
             foreach (var filter in filters) {
                 filter.Setup();

@@ -62,8 +62,14 @@ namespace TextExtraTags {
         }
 
         public void AddLength(int length) {
+            if (length < 0) length = 0;
             EnsureCapacity(textSize + length);
             textSize += length;
+        }
+
+        public void SetLength(int length) {
+            EnsureCapacity(length);
+            textSize = length;
         }
     }
 }

@@ -136,7 +136,7 @@ namespace TextExtraTags.Editor {
                 var preset = presets.GetArrayElementAtIndex(index);
                 preset.FindPropertyRelative("name").stringValue = "New Parser";
                 preset.FindPropertyRelative("capacityLevel").intValue = 1;
-                preset.FindPropertyRelative("iterationLimit").intValue = 2;
+                preset.FindPropertyRelative("iterationLimit").intValue = 1;
             }
 
             EditorGUILayout.Space();

@@ -18,15 +18,6 @@ namespace TextExtraTags.Standards {
         }
 
         public override void ProcessTagData(int index, ref ParserContext context) {
-            ProcessRichTextTags(ref context);
-        }
-
-        public override void ProcessBufferedTagData(ref ParserContext context) {
-            ProcessRichTextTags(ref context);
-        }
-
-
-        void ProcessRichTextTags(ref ParserContext context) {
             var tagData = context.TagData;
             if (noparseMode) {
                 if (tagData.IsName("/noparse")) {

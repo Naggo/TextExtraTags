@@ -14,7 +14,7 @@ namespace TextExtraTags {
         int capacityLevel;
 
         [SerializeField]
-        [Range(1, 7)]
+        [Range(1, 5)]
         int iterationLimit;
 
         [SerializeField]
@@ -24,7 +24,7 @@ namespace TextExtraTags {
         public string Name => name;
 
 
-        public ParserPreset(string name, int capacityLevel = 1, int iterationLimit = 2, IEnumerable<ExtraTagFeature> features = null) {
+        public ParserPreset(string name, int capacityLevel = 1, int iterationLimit = 1, IEnumerable<ExtraTagFeature> features = null) {
             this.name = name;
             this.capacityLevel = capacityLevel;
             this.iterationLimit = iterationLimit;
@@ -50,6 +50,10 @@ namespace TextExtraTags {
                 4 => 2048,
                 >=5 => 4096
             };
+        }
+
+        public int GetIterationLimit() {
+            return iterationLimit;
         }
     }
 }
