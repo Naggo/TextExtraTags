@@ -45,21 +45,29 @@ namespace TextExtraTags.Standards {
         public int EndTagIndex => Index + BaseLength;
     }
 
+    public class RubyTagPoolable : RubyTag, IPoolableExtraTag<RubyTagPoolable> {}
+
 
     public class RubyTagFeature : ExtraTagFeature {
+        public bool enablePooling = false;
         public bool convertTag = true;
         [Min(0)]
         public float rubySize = 0.5f;
 
         public override void Register(ParserFilters filters) {
-            filters.AddFilter(new RubyTagFilter() { rubySize = rubySize, convertTag = convertTag });
+            filters.AddFilter(new RubyTagFilter() {
+                enablePooling = enablePooling,
+                convertTag = convertTag,
+                rubySize = rubySize
+            });
         }
     }
 
 
     public class RubyTagFilter : ExtraTagFilter {
-        public float rubySize;
+        public bool enablePooling;
         public bool convertTag;
+        public float rubySize;
 
         int startIndex;
         int rubyLength;
@@ -101,7 +109,12 @@ namespace TextExtraTags.Standards {
             int rL = ruby.Length;
             int kL = index - startIndex;
 
-            var tag = new RubyTag();
+            RubyTag tag;
+            if (enablePooling) {
+                tag = ExtraTagPool<RubyTagPoolable>.Get(() => new());
+            } else {
+                tag = new RubyTag();
+            }
             tag.index = startIndex;
             tag.BaseLength = kL;
             tag.RubyLength = rL;

@@ -1,27 +1,29 @@
 #if TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 
-namespace TextExtraTags {
+namespace TextExtraTags.Standards {
     [RequireComponent(typeof(TMP_Text))]
-    public class TextExtraParser : MonoBehaviour {
+    public class TextExtraParser : MonoBehaviour, IEnumerable<ExtraTag> {
         public TMP_Text textComponent;
 
         [TextArea(5, 10)]
         public string sourceText;
 
         public string parserName = TextExtraTagsSettings.DefaultPresetName;
-        public bool parseOnAwake;
+        public bool parseOnAwake = true;
+        public bool enablePooling = false;
 
         ICollection<ExtraTag> _extraTags;
         ICollection<ExtraTag> extraTags {
             get {
                 if (_extraTags is null) {
-                    _extraTags = new List<ExtraTag>();
+                    _extraTags = enablePooling ? new PoolableExtraTagCollection() : new List<ExtraTag>();
                 }
                 return _extraTags;
             }
@@ -89,8 +91,13 @@ namespace TextExtraTags {
             }
         }
 
-        public IEnumerable<ExtraTag> GetAllExtraTags() {
-            return extraTags;
+        public IEnumerator<ExtraTag> GetEnumerator() {
+            return extraTags.GetEnumerator();
+        }
+
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
     }
 }

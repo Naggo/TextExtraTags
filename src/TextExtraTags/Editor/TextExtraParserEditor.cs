@@ -1,11 +1,10 @@
 #if TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
+using TextExtraTags.Standards;
 
 
 namespace TextExtraTags.Editor {
@@ -19,6 +18,7 @@ namespace TextExtraTags.Editor {
         SerializedProperty sourceText;
         SerializedProperty parserName;
         SerializedProperty parseOnAwake;
+        SerializedProperty enablePooling;
 
 
         void FindProperties() {
@@ -26,6 +26,7 @@ namespace TextExtraTags.Editor {
             sourceText = serializedObject.FindProperty("sourceText");
             parserName = serializedObject.FindProperty("parserName");
             parseOnAwake = serializedObject.FindProperty("parseOnAwake");
+            enablePooling = serializedObject.FindProperty("enablePooling");
         }
 
 
@@ -38,6 +39,7 @@ namespace TextExtraTags.Editor {
             EditorGUILayout.PropertyField(sourceText);
             DrawParserName();
             EditorGUILayout.PropertyField(parseOnAwake);
+            EditorGUILayout.PropertyField(enablePooling);
 
             if (serializedObject.ApplyModifiedProperties()) {
                 (target as TextExtraParser).ParseAndSetText();
