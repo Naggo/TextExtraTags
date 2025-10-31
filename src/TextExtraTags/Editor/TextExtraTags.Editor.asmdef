@@ -3,7 +3,8 @@
     "rootNamespace": "TextExtraTags.Editor",
     "references": [
         "TextExtraTags",
-        "TextExtraTags.Standards"
+        "TextExtraTags.Standards",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

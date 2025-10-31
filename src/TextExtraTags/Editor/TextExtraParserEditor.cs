@@ -2,8 +2,6 @@
 
 using System;
 using System.Linq;
-using UnityEngine;
-using UnityEditor;
 using TextExtraTags.Standards;
 
 
@@ -12,8 +10,6 @@ namespace TextExtraTags.Editor {
 
     [CustomEditor(typeof(TextExtraParser), editorForChildClasses: false, isFallback=false)]
     public class TextExtraParserEditor : Editor {
-        static string[] parserNames;
-
         SerializedProperty textComponent;
         SerializedProperty sourceText;
         SerializedProperty parserName;
@@ -30,10 +26,12 @@ namespace TextExtraTags.Editor {
         }
 
 
+        void OnEnable() {
+            FindProperties();
+        }
+
         public override void OnInspectorGUI() {
-            if (sourceText == null) {
-                FindProperties();
-            }
+            serializedObject.Update();
 
             EditorGUILayout.PropertyField(textComponent);
             EditorGUILayout.PropertyField(sourceText);
