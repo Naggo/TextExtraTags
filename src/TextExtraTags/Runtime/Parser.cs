@@ -41,15 +41,16 @@ namespace TextExtraTags {
             results.Clear();
 
             filters.Setup();
-            ProcessText(source, results, 1, 0, 0);
+            ProcessText(source, results, 1, 0);
             filters.Reset();
 
             return this;
         }
 
 
-        int ProcessText(ReadOnlySpan<char> source, ICollection<ExtraTag> results, int iterationCount, int textCount, int nextBufferStart) {
+        int ProcessText(ReadOnlySpan<char> source, ICollection<ExtraTag> results, int iterationCount, int textCount) {
             int sourceIndex = 0;
+            int nextBufferStart = filterTextBuffer.Length;
             while (TryParseTag(source, sourceIndex, out ParserTagData tagData)) {
                 int textLength = tagData.Index - sourceIndex;
                 int textAndTagLength = textLength + tagData.Length;
@@ -74,19 +75,21 @@ namespace TextExtraTags {
                     sourceIndex += textAndTagLength;
                 }
 
-                ReadOnlySpan<char> bufferSpan = filterTextBuffer.AsSpan().Slice(nextBufferStart);
-                if (!bufferSpan.IsEmpty) {
+                if (filterTextBuffer.Length > nextBufferStart) {
+                    ReadOnlySpan<char> bufferSpan = filterTextBuffer.AsSpan().Slice(nextBufferStart);
                     if (iterationCount < iterationLimit) {
-                        textCount = ProcessText(bufferSpan, results, iterationCount + 1, textCount, nextBufferStart + bufferSpan.Length);
+                        // 追加テキストを解析する
+                        textCount = ProcessText(bufferSpan, results, iterationCount + 1, textCount);
                     } else {
-                        int remainBufferTextLength = bufferSpan.Length;
+                        // 追加テキストをそのまま加算する
                         textBuffer.AddText(bufferSpan);
-                        textCount += remainBufferTextLength;
+                        textCount += bufferSpan.Length;
                     }
                     filterTextBuffer.SetLength(nextBufferStart);
                 }
             }
 
+            // 残りのテキストの加算
             int remainTextLength = source.Length - sourceIndex;
             textBuffer.AddText(source.Slice(sourceIndex, remainTextLength));
             textCount += remainTextLength;

@@ -8,7 +8,6 @@ using TMPro;
 
 
 namespace TextExtraTags.Standards {
-    [RequireComponent(typeof(TMP_Text))]
     public class TextExtraParser : MonoBehaviour, IEnumerable<ExtraTag> {
         public TMP_Text textComponent;
 

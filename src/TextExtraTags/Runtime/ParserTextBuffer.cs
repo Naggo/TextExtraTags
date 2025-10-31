@@ -8,7 +8,7 @@ namespace TextExtraTags {
         int textSize;
         char[] textBuffer;
 
-        public bool HasText => textSize > 0;
+        public int Length => textSize;
 
 
         public ParserTextBuffer(int capacity) {
@@ -68,6 +68,7 @@ namespace TextExtraTags {
         }
 
         public void SetLength(int length) {
+            if (length < 0) length = 0;
             EnsureCapacity(length);
             textSize = length;
         }
