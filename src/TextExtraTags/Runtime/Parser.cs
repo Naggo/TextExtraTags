@@ -51,7 +51,7 @@ namespace TextExtraTags {
         int ProcessText(ReadOnlySpan<char> source, ICollection<ExtraTag> results, int iterationCount, int textCount) {
             int sourceIndex = 0;
             int nextBufferStart = filterTextBuffer.Length;
-            while (TryParseTag(source, sourceIndex, out ParserTagData tagData)) {
+            while (ParserTagData.TryParse(source, sourceIndex, out ParserTagData tagData)) {
                 int textLength = tagData.Index - sourceIndex;
                 int textAndTagLength = textLength + tagData.Length;
                 textCount += textLength;
@@ -94,27 +94,6 @@ namespace TextExtraTags {
             textBuffer.AddText(source.Slice(sourceIndex, remainTextLength));
             textCount += remainTextLength;
             return textCount;
-        }
-
-        bool TryParseTag(ReadOnlySpan<char> source, int startIndex, out ParserTagData result) {
-            int lbIndex = -1;
-            int sepIndex = -1;
-
-            for (int i = startIndex; i < source.Length; i++) {
-                char c = source[i];
-
-                if (c == '<') {
-                    lbIndex = i;
-                } else if (c == '=' && sepIndex < lbIndex) {
-                    sepIndex = i;
-                } else if (c == '>' && 0 <= lbIndex){
-                    result = new ParserTagData(source, lbIndex, i, sepIndex);
-                    return true;
-                }
-            }
-
-            result = default;
-            return false;
         }
     }
 }
