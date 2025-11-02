@@ -36,13 +36,13 @@ https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 
 - Features:
 パーサーに追加されたFeatureの一覧です。
-`ExtraTagFeature`の派生クラスにシリアライズ可能なフィールドがある場合、ここに表示されます。
+`ExtraTagFeature`の派生型にシリアライズ可能なフィールドがある場合、ここに表示されます。
 
 * Add Feature:
 パーサーに`ExtraTagFeature`を追加します。
-`TypeCache.GetTypesDerivedFrom()`から取得した派生クラスを一覧表示します。
+`TypeCache.GetTypesDerivedFrom()`から取得した派生型を一覧表示します。
 
-* Create new Parser
+* Create new Parser:
 パーサーを新規作成します。
 
 ```
