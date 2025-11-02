@@ -92,14 +92,18 @@ namespace TextExtraTags.Standards {
                 if (ruby.Length > 0) {
                     startIndex = index;
                     SetRubyText(tagData.Value);
-                    context.ExcludeFromText = true;
+                    if (convertTag) {
+                        context.ExcludeFromText = true;
+                    }
                 }
             } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubyLength > 0) {
                     ProcessRuby(index, ref context);
                     rubyLength = 0;
                 }
-                context.ExcludeFromText = true;
+                if (convertTag) {
+                    context.ExcludeFromText = true;
+                }
             }
         }
 
