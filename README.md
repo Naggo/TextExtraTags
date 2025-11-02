@@ -20,7 +20,7 @@ https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 以下はメニュー項目の説明です。
 ```md
 * Create Asset:
-設定用のアセットを作成します。作成後は移動しても問題はありませんが、`Resources`フォルダの中に含める必要があります。
+設定用のアセットを作成します。アセットは移動しても問題はありませんが、`Resources`フォルダの中に含める必要があります。
 
 - Name:
 パーサーの名前を設定します。`Parser`オブジェクトを取得する際に使用します。
@@ -34,7 +34,7 @@ https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 `2`以上に設定することを推奨します。
 
 - Features:
-パーサーに追加された`ExtraTagFeature`の一覧です。
+パーサーに追加されたFeatureの一覧です。
 `ExtraTagFeature`の派生クラスにシリアライズ可能なフィールドがある場合、ここに表示されます。
 
 * Add Feature:
@@ -46,9 +46,30 @@ https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 
 ```
 
-## TextExtraTags.Standards
+## 標準機能
 
+`TextExtraTags.Standards`には標準的な機能やサンプルが入っています。
+以下はその説明です。
+```md
+- TextExtraParser
+フィールドに入力された文字列を解析してTextMeshProに反映するコンポーネントです。
+解析処理の動作検証にも利用できます。
 
+- RichTextTagsSupport
+文字列内のリッチテキスト用のタグを簡易的に判定します。
+判定されたタグは文字数の計算から除外され、以降のフィルターの処理をスキップされます。
+これより先にタグの処理を行いたい場合、`RichTextTagsSupport`より上にFeatureを配置することで可能です。
+
+- RubyTagFeature
+`<ruby=かんじ>漢字</ruby>`のようにルビを振るタグを追加するサンプルです。
+漢字の開始地点に`RubyTag`が追加され、漢字とルビの文字数が記録されます。
+正常に動作するには`RichTextTagsSupport`と、`Iteration Limit`を`2`以上に設定する必要があります。
+
+- IPoolableExtraTag, PoolableExtraTagCollection
+タグデータのプールを実装するためのインターフェイスとコレクションです。
+`PoolableExtraTagCollection`から要素が削除される際、その要素が`IPoolableExtraTag`を継承していたらそれをプールに戻します。
+
+```
 
 ## License
 
