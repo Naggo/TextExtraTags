@@ -20,7 +20,8 @@ https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags
 以下はメニュー項目の説明です。
 ```md
 * Create Asset:
-設定用のアセットを作成します。アセットは移動しても問題はありませんが、`Resources`フォルダの中に含める必要があります。
+設定用のアセットを作成します。
+アセットは移動しても問題はありませんが、名前を変えずに`Resources`フォルダの中に含める必要があります。
 
 - Name:
 パーサーの名前を設定します。`Parser`オブジェクトを取得する際に使用します。
