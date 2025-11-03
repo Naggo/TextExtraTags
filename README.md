@@ -6,7 +6,7 @@
 
 Recent release version:
 ```
-https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags#v1.1.0
+https://github.com/Naggo/TextExtraTags.git?path=src/TextExtraTags#v2.0.0
 ```
 
 Latest developments:
