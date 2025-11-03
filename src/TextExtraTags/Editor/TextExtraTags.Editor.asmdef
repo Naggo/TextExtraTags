@@ -2,7 +2,9 @@
     "name": "TextExtraTags.Editor",
     "rootNamespace": "TextExtraTags.Editor",
     "references": [
-        "TextExtraTags"
+        "TextExtraTags",
+        "TextExtraTags.Standards",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
@@ -11,7 +13,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [
         {
@@ -23,11 +25,6 @@
             "name": "com.unity.ugui",
             "expression": "2.0.0",
             "define": "TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT"
-        },
-        {
-            "name": "com.cysharp.zstring",
-            "expression": "",
-            "define": "TEXTEXTRATAGS_ZSTRING_SUPPORT"
         }
     ],
     "noEngineReferences": false

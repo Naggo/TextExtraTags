@@ -1,11 +1,8 @@
 #if TEXTEXTRATAGS_TEXTMESHPRO_SUPPORT
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using UnityEditor;
+using TextExtraTags.Standards;
 
 
 namespace TextExtraTags.Editor {
@@ -13,31 +10,34 @@ namespace TextExtraTags.Editor {
 
     [CustomEditor(typeof(TextExtraParser), editorForChildClasses: false, isFallback=false)]
     public class TextExtraParserEditor : Editor {
-        static string[] parserNames;
-
+        SerializedProperty textComponent;
         SerializedProperty sourceText;
         SerializedProperty parserName;
         SerializedProperty parseOnAwake;
+        SerializedProperty enablePooling;
 
-
-        void OnEnable() {
-            parserNames = ParserUtility.GetParserNames().ToArray();
-        }
 
         void FindProperties() {
+            textComponent = serializedObject.FindProperty("textComponent");
             sourceText = serializedObject.FindProperty("sourceText");
             parserName = serializedObject.FindProperty("parserName");
             parseOnAwake = serializedObject.FindProperty("parseOnAwake");
+            enablePooling = serializedObject.FindProperty("enablePooling");
+        }
+
+
+        void OnEnable() {
+            FindProperties();
         }
 
         public override void OnInspectorGUI() {
-            if (sourceText == null) {
-                FindProperties();
-            }
+            serializedObject.Update();
 
+            EditorGUILayout.PropertyField(textComponent);
             EditorGUILayout.PropertyField(sourceText);
             DrawParserName();
             EditorGUILayout.PropertyField(parseOnAwake);
+            EditorGUILayout.PropertyField(enablePooling);
 
             if (serializedObject.ApplyModifiedProperties()) {
                 (target as TextExtraParser).ParseAndSetText();
@@ -46,6 +46,12 @@ namespace TextExtraTags.Editor {
 
         void DrawParserName() {
             string name = parserName.stringValue;
+
+            string[] parserNames = ParserUtility.GetParserNames().ToArray();
+            if (!ArrayUtility.Contains(parserNames, name)) {
+                ArrayUtility.Insert(ref parserNames, 0, name);
+            }
+
             DrawStringPopup(parserName.displayName, ref name, parserNames);
             parserName.stringValue = name;
         }

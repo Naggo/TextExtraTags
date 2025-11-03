@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.Assertions;
 
 
-namespace TextExtraTags {
-    static class ExtraTagPool<T> {
+namespace TextExtraTags.Standards {
+    public static class ExtraTagPool<T> where T: IPoolableExtraTag {
         static Stack<T> stack = new();
 
-        public static T GetItem(Func<T> ctor) {
+        public static T Get(Func<T> ctor) {
             if (stack.Count == 0) {
                 return ctor();
             } else {
@@ -14,7 +15,8 @@ namespace TextExtraTags {
             }
         }
 
-        public static void ReturnItem(T item) {
+        public static void Return(T item) {
+            Assert.IsFalse(stack.Contains(item));
             stack.Push(item);
         }
     }

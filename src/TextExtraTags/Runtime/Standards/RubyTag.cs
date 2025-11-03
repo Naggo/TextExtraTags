@@ -1,17 +1,12 @@
 using System;
 using System.Buffers;
+using System.Globalization;
 using UnityEngine;
-
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-    using Cysharp.Text;
-#else
-    using System.Text;
-#endif
 
 
 /*
 
-RubyTagFilter based on TextMeshProRuby
+RubyTagFilter is based on TextMeshProRuby
 https://github.com/ina-amagami/TextMeshProRuby
 
 MIT License
@@ -40,25 +35,38 @@ SOFTWARE.
 
 
 namespace TextExtraTags.Standards {
-    public class RubyTag : ExtraTag<RubyTag> {
+    public class RubyTag : ExtraTag {
+        internal int index;
+
         public int BaseLength { get; internal set; }
         public int RubyLength { get; internal set; }
 
+        public override int Index => index;
         public int EndTagIndex => Index + BaseLength;
     }
 
+    public class RubyTagPoolable : RubyTag, IPoolableExtraTag<RubyTagPoolable> {}
+
 
     public class RubyTagFeature : ExtraTagFeature {
+        public bool enablePooling = false;
+        public bool convertTag = true;
         [Min(0)]
         public float rubySize = 0.5f;
 
         public override void Register(ParserFilters filters) {
-            filters.AddFilter(new RubyTagFilter() { rubySize = rubySize });
+            filters.AddFilter(new RubyTagFilter() {
+                enablePooling = enablePooling,
+                convertTag = convertTag,
+                rubySize = rubySize
+            });
         }
     }
 
 
     public class RubyTagFilter : ExtraTagFilter {
+        public bool enablePooling;
+        public bool convertTag;
         public float rubySize;
 
         int startIndex;
@@ -77,64 +85,73 @@ namespace TextExtraTags.Standards {
             rubyBuffer = null;
         }
 
-        public override void ProcessTagData(int index, ref ParserFilterContext context) {
+        public override void ProcessTagData(int index, ref ParserContext context) {
             var tagData = context.TagData;
             if (tagData.IsName("ruby") || tagData.IsName("r")) {
                 var ruby = tagData.Value;
                 if (ruby.Length > 0) {
                     startIndex = index;
-                    AppendText(tagData.Value);
-                    context.ExcludeFromSourceText = true;
+                    SetRubyText(tagData.Value);
+                    if (convertTag) {
+                        context.ExcludeFromText = true;
+                    }
                 }
             } else if (tagData.IsName("/ruby") || tagData.IsName("/r")) {
                 if (rubyLength > 0) {
                     ProcessRuby(index, ref context);
                     rubyLength = 0;
                 }
-                context.ExcludeFromSourceText = true;
-            }
-        }
-
-
-        void ProcessRuby(int index, ref ParserFilterContext context) {
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-            using (var builder = ZString.CreateStringBuilder(true))
-#else
-            var builder = new StringBuilder();
-#endif
-            {
-                ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
-                int rL = ruby.Length;
-                int kL = index - startIndex;
-                float rHalf = rL * rubySize * 0.5f;
-                float kHalf = kL * 0.5f;
-
-                // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
-                float space = -(kHalf + rHalf);
-                builder.AppendFormat("<space={0:F2}em><voffset=1em><size={1:0.#%}>", space, rubySize);
-                builder.Append(ruby);
-                builder.Append("</size></voffset>");
-
-                // 後ろに付ける空白
-                space = kHalf - rHalf;
-                if (space != 0) {
-                    builder.AppendFormat("<space={0:F2}em>", space);
+                if (convertTag) {
+                    context.ExcludeFromText = true;
                 }
-
-                var tag = RubyTag.Create(startIndex, () => new RubyTag());
-                tag.BaseLength = kL;
-                tag.RubyLength = rL;
-                context.Buffer.AddExtraTag(tag);
-
-#if TEXTEXTRATAGS_ZSTRING_SUPPORT
-                context.Buffer.AddText(builder.AsSpan());
-#else
-                context.Buffer.AddText(builder.ToString());
-#endif
             }
         }
 
-        void AppendText(ReadOnlySpan<char> text) {
+
+        void ProcessRuby(int index, ref ParserContext context) {
+            ReadOnlySpan<char> ruby = rubyBuffer.AsSpan(0, rubyLength);
+            int rL = ruby.Length;
+            int kL = index - startIndex;
+
+            RubyTag tag;
+            if (enablePooling) {
+                tag = ExtraTagPool<RubyTagPoolable>.Get(() => new());
+            } else {
+                tag = new RubyTag();
+            }
+            tag.index = startIndex;
+            tag.BaseLength = kL;
+            tag.RubyLength = rL;
+            context.AddExtraTag(tag);
+
+            if (!convertTag) return;
+
+            // 文字数分だけ左に移動 - 開始タグ - ルビ - 終了タグ
+            int count;
+            float rHalf = rL * rubySize * 0.5f;
+            float kHalf = kL * 0.5f;
+            float space = -(kHalf + rHalf);
+            context.AddText("<space=");
+            space.TryFormat(context.GetTextSpan(32), out count, "F2", CultureInfo.InvariantCulture);
+            context.AddTextLength(count);
+            context.AddText("em><voffset=1em><size=");
+            rubySize.TryFormat(context.GetTextSpan(32), out count, "0.#%", CultureInfo.InvariantCulture);
+            context.AddTextLength(count);
+            context.AddText(">");
+            context.AddText(ruby);
+            context.AddText("</size></voffset>");
+
+            // 後ろに付ける空白
+            space = kHalf - rHalf;
+            if (space != 0) {
+                context.AddText("<space=");
+                space.TryFormat(context.GetTextSpan(32), out count, "F2", CultureInfo.InvariantCulture);
+                context.AddTextLength(count);
+                context.AddText("em>");
+            }
+        }
+
+        void SetRubyText(ReadOnlySpan<char> text) {
             Span<char> span = rubyBuffer.AsSpan();
             if (text.Length > span.Length) {
                 int newBufferSize = rubyBuffer.Length * 2;

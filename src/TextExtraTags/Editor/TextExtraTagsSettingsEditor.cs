@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 
 namespace TextExtraTags.Editor {
@@ -21,10 +18,13 @@ namespace TextExtraTags.Editor {
             presets = serializedObject.FindProperty("parserPresets");
         }
 
+
+        void OnEnable() {
+            FindProperties();
+        }
+
         public override void OnInspectorGUI() {
-            if (defaultPreset == null) {
-                FindProperties();
-            }
+            serializedObject.Update();
 
             DrawPreset(defaultPreset, true);
             int i = 0;
@@ -33,14 +33,19 @@ namespace TextExtraTags.Editor {
             }
             DrawCreateButton();
 
+            Apply();
+        }
+
+        void Apply() {
             if (serializedObject.ApplyModifiedProperties()) {
-                settings.ResetParsers();
+                settings.ResetAllParsers();
             }
         }
 
         void DrawPreset(SerializedProperty preset, bool isDefault, int index = 0) {
             SerializedProperty name = preset.FindPropertyRelative("name");
             SerializedProperty capacityLevel = preset.FindPropertyRelative("capacityLevel");
+            SerializedProperty iterationLimit = preset.FindPropertyRelative("iterationLimit");
             SerializedProperty features = preset.FindPropertyRelative("features");
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -58,6 +63,7 @@ namespace TextExtraTags.Editor {
                 EditorGUILayout.PropertyField(name);
             }
             EditorGUILayout.PropertyField(capacityLevel);
+            EditorGUILayout.PropertyField(iterationLimit);
             EditorGUILayout.PropertyField(features);
             if (GUILayout.Button("Add Feature")) {
                 ShowFeatureMenu(features);
@@ -74,6 +80,7 @@ namespace TextExtraTags.Editor {
             if (index > 0) {
                 void MoveUp() {
                     presets.MoveArrayElement(index, index-1);
+                    Apply();
                 }
                 menu.AddItem(new GUIContent("Move Up"), false, MoveUp);
             } else {
@@ -83,19 +90,22 @@ namespace TextExtraTags.Editor {
             if (index < (presets.arraySize - 1)) {
                 void MoveDown() {
                     presets.MoveArrayElement(index, index+1);
+                    Apply();
                 }
                 menu.AddItem(new GUIContent("Move Down"), false, MoveDown);
             } else {
                 menu.AddDisabledItem(new GUIContent("Move Down"));
             }
 
-            static void CallDuplicateCommand(object obj) {
+            void CallDuplicateCommand(object obj) {
                 (obj as SerializedProperty)?.DuplicateCommand();
+                Apply();
             }
             menu.AddItem(new GUIContent("Duplicate"), false, CallDuplicateCommand, preset);
 
-            static void CallDeleteCommand(object obj) {
+            void CallDeleteCommand(object obj) {
                 (obj as SerializedProperty)?.DeleteCommand();
+                Apply();
             }
             menu.AddItem(new GUIContent("Delete"), false, CallDeleteCommand, preset);
 
@@ -112,6 +122,7 @@ namespace TextExtraTags.Editor {
 
                 var feature = features.GetArrayElementAtIndex(index);
                 feature.managedReferenceValue = Activator.CreateInstance(featureType);
+                Apply();
             }
 
             var types = TypeCache.GetTypesDerivedFrom<ExtraTagFeature>();
@@ -133,6 +144,8 @@ namespace TextExtraTags.Editor {
 
                 var preset = presets.GetArrayElementAtIndex(index);
                 preset.FindPropertyRelative("name").stringValue = "New Parser";
+                preset.FindPropertyRelative("capacityLevel").intValue = 1;
+                preset.FindPropertyRelative("iterationLimit").intValue = 2;
             }
 
             EditorGUILayout.Space();

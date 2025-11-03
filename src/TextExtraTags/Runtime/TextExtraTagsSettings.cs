@@ -12,51 +12,40 @@ namespace TextExtraTags {
                 if (_instance == null) {
                     _instance = Resources.Load<TextExtraTagsSettings>(nameof(TextExtraTagsSettings));
                     if (_instance == null) {
-                        _instance = CreateDefaultSettings();
+                        _instance = ScriptableObject.CreateInstance<TextExtraTagsSettings>();
                     }
                 }
                 return _instance;
             }
         }
 
-        public static TextExtraTagsSettings CreateDefaultSettings() {
-            var settings = ScriptableObject.CreateInstance<TextExtraTagsSettings>();
-            settings.defaultPreset = new ParserPreset(DefaultPresetName, 2);
-            settings.parserPresets = new();
-
-            return settings;
-        }
-
 
         [SerializeField]
-        ParserPreset defaultPreset;
+        ParserPreset defaultPreset = new ParserPreset(DefaultPresetName);
         [SerializeField]
-        List<ParserPreset> parserPresets;
+        List<ParserPreset> parserPresets = new();
 
         Parser defaultParser;
-        Dictionary<string, Parser> parsers;
+        Dictionary<string, Parser> parsers = new();
 
 
         void OnDestroy() {
-            ResetParsers();
+            ResetAllParsers();
         }
 
 
-        public void ResetParsers() {
+        public void ResetAllParsers() {
             defaultParser = null;
             if (parsers is null || parsers.Count == 0) return;
             parsers.Clear();
         }
 
         public Parser GetParser(string name, bool returnDefault = true) {
-            if (name == DefaultPresetName) {
+            if (name == defaultPreset.Name) {
                 return GetDefaultParser();
             }
 
             Parser parser;
-            if (parsers is null) {
-                parsers = new();
-            }
             if (parsers.TryGetValue(name, out parser)) {
                 return parser;
             }
@@ -81,7 +70,7 @@ namespace TextExtraTags {
         }
 
         public ParserPreset GetPreset(string name) {
-            if (name == DefaultPresetName) {
+            if (name == defaultPreset.Name) {
                 return GetDefaultPreset();
             }
 
@@ -96,7 +85,7 @@ namespace TextExtraTags {
         }
 
         public IEnumerable<string> GetNames() {
-            yield return DefaultPresetName;
+            yield return defaultPreset.Name;
             foreach (var preset in parserPresets) {
                 yield return preset.Name;
             }
